@@ -1,0 +1,28 @@
+\newpage % Rozdziały zaczynamy od nowej strony.
+\section{Wnioski}
+
+Na podstawie wyników przedstawionych w poprzednim rozdziale, możemy uszeregować algorytmy od najmniej do najbardziej skutecznego:\begin{enumerate}
+    \item Algorytm losowy
+    \item Rozszerzony algorytm losowy
+    \item Algorytm oparty na heurystyce najbardziej prawdopodobnej lokalizacji na podstawie trafień
+    \item Algorytm oparty na heurystyce maksymalizacji zysku priorytetyzującej dłuższe statki
+    \item Algorytm oparty na heurystyce maksymalizacji zysku ze strzału
+        \item Algorytm oparty na heurystykach maksymalizacji zysku oraz najbardziej prawdopodobnej lokalizacji na podstawie trafień priorytetyzującej dłuższe statki
+    \item Algorytm oparty na heurystykach maksymalizacji zysku oraz najbardziej prawdopodobnej lokalizacji na podstawie trafień
+\end{enumerate}
+
+Na wykresie widocznym na rysunku 6.1. widzimy że pomiędzy heurystyką maksymalizacji zysku ze strzału oraz heurystyką najbardziej prawdopodobnej lokalizacji na podstawie trafień, to ta pierwsza jest bardziej skuteczna. Tak więc minimalizacja możliwych położeń statków na mapie jest bardziej opłacalna, nawet jeśli algorytm nie potrafi analizować trafień w celu 'dobijania' statków. Generalnie, z wykresu wyraźnie widać, że im mniej losowości w algorytmie, tym jest skuteczniejszy - algorytm \emph{Analiza trafień} losowo wybiera ostrzeliwane komórki, jeśli nie ma żadnego trafienia, które może analizować.
+
+Na wykresie widać również brak znaczącej różnicy pomiędzy algorytmami priorytetyzującymi dłuższe statki, a podstawowymi wariantami tychże algorytmów. Jest to prawdopodobnie spowodowane faktem, że trafienie największego statku zazwyczaj nie jest największym wyzwaniem w rozgrywce. Najbardziej problematyczne jest raczej trafienie najmniejszego statku - żadna heurystyka nie jest w stanie pomóc w odnalezieniu jego lokalizacji.
+
+W wynikach widać też, że gdy statki mogą się ze sobą stykać, wyniki starć pomiędzy poszczególnymi algorytmami są bardziej wyrównane. Algorytmy losowe nadal są zdecydowanie najsłabsze, ale algorytmy oparte na heurystykach mają skuteczności w przedziale około 40-60\%. W przypadku tego wariantu zasad, na skuteczności wiele tracą algorytmy oparte na heurystyce maksymalizacji zysku ze strzału. Mniej ograniczeń lokalizacji statku przez zasady, oznacza że istnieje więcej potencjalnych rozmieszczeń statków na planszy przeciwnika. Algorytm potrzebuje więcej ruchów, aby eliminować, te możliwe położenia. 
+
+Tę teorię potwierdza analiza skuteczności wszystkich algorytmów przeciwko algorytmowi losowemu, która jest widoczna na rysunku 6.2. Łatwo zauważyć, że prawie we wszystkich przypadkach, skuteczności  znacznie różnią się zależnie od wybranych zasad. Jedynym wyjątkiem jest algorytm oparty na heurystyce najbardziej prawdopodobnej lokalizacji na podstawie trafień. Algorytm ten wybiera losowo komórki do ostrzału, jeśli na planszy nie ma żadnego trafienia - nie ma więc na niego wpływu fakt, że statki mogą się ze sobą stykać.
+
+Różnicę dobrze widać też na rysunku 6.2, który przedstawia średnią liczbę tur w zależności od tego z jakim algorytmem mierzył się algorytm losowy. W przypadku wszystkich algorytmów poza \emph{Analizą trafień}, liczba tur gdy statki mogą się ze sobą stykać jest znacznie wyższa niż w przeciwnym wypadku. Widać też że liczba tur spada znacznie wolniej wraz ze wzrostem zaawansowania algorytmu. Wynika to z wcześniej wspomnianego faktu, że heurystyka maksymalizacji zysku ze strzału traci na efektywności gdy statki mogą się ze sobą stykać.
+
+W tabelach 6.1-6.9 widać dobrze, że im skuteczniejszy jest dany algorytm, tym krótsze są średnio jego rozgrywki. Średnio najmniej tur potrzebnych było w starciach algorytmów \emph{Max. zysk + analiza trafień} oraz \emph{Max. zysk rozszerzony + analiza trafień}.
+
+
+\subsection{Ograniczenia pracy}
+Nie udało się niestety zebrać wystarczająco dużo danych z rozgrywek człowiek-algorytm, aby ocenić skuteczność algorytmów w starciach z człowiekiem

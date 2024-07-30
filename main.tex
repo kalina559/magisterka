@@ -1,0 +1,185 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Bachelor's & Master's Thesis Template             %%
+%% Copyleft by Artur M. Brodzki & Piotr Woźniak      %%
+%% Faculty of Electronics and Information Technology %%
+%% Warsaw University of Technology, 2019-2020        %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[
+    left=2.5cm,         % Sadly, generic margin parameter
+    right=2.5cm,        % doesnt't work, as it is
+    top=2.5cm,          % superseded by more specific
+    bottom=3cm,         % left...bottom parameters.
+    bindingoffset=6mm,  % Optional binding offset.
+    nohyphenation=false % You may turn off hyphenation, if don't like.
+]{eiti/eiti-thesis}
+
+\langpol % Dla języka angielskiego mamy \langeng
+\graphicspath{{img/}}             % Katalog z obrazkami.
+\addbibresource{bibliografia.bib} % Plik .bib z bibliografią
+
+% \usepackage[T1]{fontenc}
+% \usepackage[scaled]{beramono}
+
+\usepackage{color}
+\definecolor{bluekeywords}{rgb}{0.13,0.13,1}
+\definecolor{greencomments}{rgb}{0,0.5,0}
+\definecolor{redstrings}{rgb}{0.9,0,0}
+
+\usepackage[utf8]{inputenc}
+\usepackage{listings}
+
+\lstset{literate={↑}{$\uparrow$}1 {↓}{$\downarrow$}1 {←}{$\leftarrow$}1 {→}{$\rightarrow$}1}
+
+
+\lstset{language=[Sharp]C,
+showspaces=false,
+showtabs=false,
+breaklines=true,
+showstringspaces=false,
+breakatwhitespace=true,
+escapeinside={(*@}{@*)},
+commentstyle=\color{greencomments},
+keywordstyle=\color{bluekeywords}\bfseries,
+stringstyle=\color{redstrings},
+breaklines=true
+}
+
+\lstdefinelanguage{JavaScript}{
+  keywords={break, case, catch, continue, debugger, default, delete, do, else, finally, for, function, if, in, instanceof, new, return, switch, this, throw, try, typeof, var, void, while, with},
+  morecomment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]',
+  morestring=[b]",
+  sensitive=true,
+  breaklines=true
+}
+
+\begin{document}
+
+%--------------------------------------
+% Strona tytułowa
+%--------------------------------------
+\MasterThesis % Dla pracy inżynierskiej mamy \EngineerThesis
+\instytut{Instytut Automatyki i Informatyki Stosowanej}
+\kierunek{Informatyka}
+\specjalnosc{Systemy Internetowe Wspomagania Zarządzania}
+\title{
+    Implementacja gry strategicznej Statki, opracowanie algorytmów decyzyjnych oraz analiza ich skuteczności.
+}
+\engtitle{ % Tytuł po angielsku do angielskiego streszczenia
+    Implementation of a Battleships strategy game, development of decision making algorithms and an analysis of their effectiveness.
+}
+\author{Jakub Kalinowski}
+\album{284234}
+\promotor{dr Sebastian Plamowski}
+\date{\the\year}
+\maketitle
+
+%--------------------------------------
+% Streszczenie po polsku
+%--------------------------------------
+\cleardoublepage % Zaczynamy od nieparzystej strony
+\streszczenie{
+Celem niniejszej pracy było zaimplementowanie gry strategicznej Statki i opracowanie algorytmów decyzyjnych, aby ostatecznie przeanalizować skuteczność poszczególnych algorytmów. Według wstępnych założeń, algorytmy miały opierać się na heurystykach. Analiza skuteczności miała opierać się na bezpośrednich starciach różnych algorytmów oraz jeśli udałoby uzbierać się wystarczająco wiele danych - na starciach człowiek - algorytm.
+\\ \indent W pracy omówione zostały zagadnienia związane z heurystykami, z punktu widzenia logiki oraz informatyki. Opisane zostały typowe zastosowania heurystyk.
+\\ \indent W dalszej części pracy opisane zostało zaimplementowane rozwiązanie - wykorzystany stack technologiczny, logika aplikacji, implementacja poszczególnych heurystyk. Opisane zostało działanie najważniejszych fragmentów kodu.
+\\ \indent Kolejnym krokiem było testowanie algorytmów. W tym celu napisane zostały testy jednostkowe, które zestawiały przeciwko sobie poszczególne heurystyki. Na podstawie wyników tych starć dokonano analizy porównawczej. Podjęto również próbę analizy starć między algorytmami oraz ludźmi.
+\\ \indent W ostatniej częsci pracy podsumowane zostały wyniki, oraz wypisane zostały wnioski - co można było zrobić lepiej, jakie są możliwości rozwoju aplikacji.
+}
+\slowakluczowe heurystyki, statki, algorytmy, vue.js, .net
+
+%--------------------------------------
+% Streszczenie po angielsku
+%--------------------------------------
+\newpage
+\abstract {
+The purpose of this study was to implement the strategy game Battleships and to develop decision-making algorithms to analyze the effectiveness of the various algorithms. According to the initial assumptions, the algorithms were to be based on heuristics. The effectiveness analysis was to be based on direct clashes between different algorithms and, if enough data could be collected, on human-algorithm clashes.
+\\ \indent The paper discusses issues related to heuristics, from the point of view of logic and computer science. Typical applications of heuristics are described.
+\\ \indent The following part of the work describes the implemented solution - the technology stack used, the application logic, the implementation of individual heuristics. The most important code fragments were highlighted and described.
+\\ \indent The next step was to test the algorithms. For this purpose, unit tests were written that pitted individual heuristics against each other. Based on the results of these clashes, a comparative analysis was made.  An attempt was also made to analyze clashes between the algorithms and players.
+\\ \indent In the last part of the work the results were summarized, and conclusions were written out - what could have been done better, what are the possibilities for the development of the application.
+}
+\keywords heuristics, battleships, algorithms, vue.js, .net
+
+%--------------------------------------
+% Oświadczenie o autorstwie
+%--------------------------------------
+\cleardoublepage  % Zaczynamy od nieparzystej strony
+\pagestyle{plain}
+\makeauthorship
+
+%--------------------------------------
+% Spis treści
+%--------------------------------------
+\cleardoublepage % Zaczynamy od nieparzystej strony
+\tableofcontents
+
+%--------------------------------------
+% Rozdziały
+%--------------------------------------
+\cleardoublepage % Zaczynamy od nieparzystej strony
+\pagestyle{headings}
+
+\input{tex/1-wstep}         % Wygodnie jest trzymać każdy rozdział w osobnym pliku.
+\input{tex/2-statki}    % Umożliwia to również łatwą migrację do nowej wersji szablonu:
+\input{tex/3-heurystyki}
+\input{tex/4-implementacja}
+\input{tex/5-przeglad}
+\input{tex/6-analiza}
+\input{tex/7-wnioski}
+\input{tex/8-podsumowanie}
+
+%--------------------------------------------
+% Literatura
+%--------------------------------------------
+\cleardoublepage % Zaczynamy od nieparzystej strony
+\printbibliography
+
+%--------------------------------------------
+% Spisy (opcjonalne)
+%--------------------------------------------
+\newpage
+\pagestyle{plain}
+
+% Wykaz symboli i skrótów.
+% Pamiętaj, żeby posortować symbole alfabetycznie
+% we własnym zakresie. Ponieważ mało kto używa takiego wykazu,
+% uznałem, że robienie automatycznie sortowanej listy
+% na poziomie LaTeXa to za duży overkill.
+% Makro \acronymlist generuje właściwy tytuł sekcji,
+% w zależności od języka.
+% Makro \acronym dodaje skrót/symbol do listy,
+% zapewniając podstawowe formatowanie.
+% //AB
+% \vspace{0.8cm}
+% \acronymlist
+% \acronym{EiTI}{Wydział Elektroniki i Technik Informacyjnych}
+% \acronym{PW}{Politechnika Warszawska}
+% \acronym{WEIRD}{ang. \emph{Western, Educated, Industrialized, Rich and Democratic}}
+
+\listoffigurestoc     % Spis rysunków.
+\vspace{1cm}          % vertical space
+\listoftablestoc      % Spis tabel.
+\vspace{1cm}          % vertical space
+\listofappendicestoc  % Spis załączników
+
+% Załączniki
+\newpage
+\input{tex/9-kod}
+
+\newpage
+\appendix{Arkusz z wynikami testów oraz wykorzystane zapytania SQL}
+
+Dostępny na płycie dołączonej do pracy.
+
+\newpage
+\appendix{Dane zgromadzone w bazie danych oraz skrypty w Pythonie użyte do ich importu}
+
+Dostępny na płycie dołączonej do pracy.
+
+% Używając powyższych spisów jako szablonu,
+% możesz tu dodać swój własny wykaz bądź listę,
+% np. spis algorytmów.
+
+\end{document} % Dobranoc.

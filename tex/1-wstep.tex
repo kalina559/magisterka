@@ -1,0 +1,20 @@
+\newpage % Rozdziały zaczynamy od nowej strony.
+\section{Wstęp}
+
+\subsection{Wprowadzenie}
+\indent\ Heurystyki, czyli uproszczone metody podejmowania decyzji, pomagają nam w codziennym życiu przy  podejmowaniu różnych decyzji, nawet jeśli nie jesteśmy tego do końca świadomi. Często korzystamy z heurystyk, aby szybciej podjąć decyzję - nie mamy wtedy jednak pewności że będzie to decyzja optymalna. "Heurystyka dostępności" jest często stosowana do szacowania prawdopodobieństwa zdarzeń, na podstawie tego jak łatwo jest nam przywołać przykłady wystąpienia tego zdarzenia - na przykład jeśli wielokrotnie słyszymy że na zaparkowany samochód spadło drzewo, będziemy unikać parkowania pod drzewem \cite{tversky74}.
+\\ \indent Heurystyki w kontekście informatyki również ułatwiają rozwiązywanie problemów, których złożoność obliczeniowa jest na tyle duża, że ma to bardzo negatywny wpływ na czas wykonywania obliczeń. Jako przykład może służyć problem komiwojażera - dla podanych miast oraz dystansów między nimi, musimy wyznaczyć najkrótszą drogę wiodącą z miasta A do B, która przechodzi przez wszystkie inne miasta. Dla małej liczby miast, problem można rozwiązać metodą brute-force, obliczając wszystkie możliwe ścieżki i wybierając najkrótszą. Jednak z każdym dodanym do zadania miastem, znacznie wzrasta liczba możliwych ścieżek - a wraz z nią czas potrzebny na obliczenia. W tym celu Job Bentley zaproponował uproszczony algorytm, który nie bierze pod uwagę wszystkich ścieżek. Zamiast tego, dla każdego kolejnego kroku, wybiera po prostu najbliższe miasto. Ostatecznie wybrana ścieżka nie zawsze będzie faktycznie tą możliwie najkrótszą, ale będzie do niej zbliżona \cite{Hjeij2023}
+\\ \indent Niniejsza praca zagłębia się w zastosowanie heurystyk w informatyce, a konkretnie w grach komputerowych. Jest do świetne narzędzie do implementacji algorytmów decyzyjnych, z których korzystają komputerowi przeciwnicy w grze. Szczególnie we wpółczesnych grach z otwartym światem, podejmowanie decyzji przez przeciwników nie może za bardzo obciążać zasobów procesora, ponieważ są one również potrzebne do obliczeń fizyki gry, symulacji otaczającego gracza świata, logiki gry, etc.
+\\ \indent 
+
+\subsection{Cel pracy}
+\indent Celem niniejszej pracy była implementacja turowej gry strategicznej Statki oraz analiza skuteczności algorytmów decyzyjnych przeciwnika. W implementacji istotne było zapewnienie możliwości archiwizacji zakończonych rozgrywek w bazie danych, aby później możliwa była ich analiza.
+
+\subsection{Metodologia}
+\indent Przedmiotem badania była ocena skuteczności zaimplementowanych algorytmów. Na koniec pracy powinniśmy znać odpowiedzi na pytania:
+\begin{enumerate}
+  \item Który algorytm decyzyjny jest najbardziej skuteczny?
+  \item Co ma wpływ na skuteczność algorytmów?
+  \item Czy skuteczność algorytmów różni się w zależności od tego czy gra przeciwko człowiekowi, czy innemu algorytmowi?
+\end{enumerate}
+Aby opowiedzieć na te pytania, przeprowadzimy analizę statystyczną rozgrywek zapisanych w bazie danych.

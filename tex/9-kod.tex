@@ -1,0 +1,1654 @@
+\inputencoding{utf8}
+\appendix{Najważniejsze fragmenty kodu aplikacji}
+
+Obie aplikacje są dostępne w repozytoriach na GitHubie:
+\begin{itemize}
+    \item Frontend - \url{https://github.com/kalina559/battleships-game}
+    \item Backend - \url{https://github.com/kalina559/battleships-backend}
+\end{itemize}
+
+Są również dostępne na płytce dołączonej do pracy, spakowane w formacie .
+
+\subsection{Frontend}
+
+\subsubsection{App.vue}
+
+W pliku App.vue, widocznym na listingu 14, znajduję się główna część aplikacji. Języki HTML oraz CSS wykorzystane są do zdefiniowania strony wizualnej, JavaScript zaś implementuje logikę. W poniższym 
+App.vue wykorzystuje pozostałe komponenty zdefiniowane w projekcie, między innymi Header.vue, UserGrid.vue czy OpponentGrid.vue. Dzięki temu ma dostęp do zdarzeń emitowanych przez te komponenty, takich jak na przykład ustawienie statku, czy wybór komórki na planszy przeciwnika.
+
+\begin{addmargin}[0mm]{0mm}
+\begin{lstlisting}[
+    language=JavaScript,
+    numbers=left,
+    firstnumber=0,
+    caption={Komponent UserGrid.vue},
+    aboveskip=0pt,
+    breaklines=true
+]
+<template>
+  <div id="app">
+    <Header />
+    <div class="content">
+      <div class="language-switcher">
+        <span @click="changeLanguage('en')" class="fi fi-gb"
+        :title="$t('englishLanguage')"></span>
+        <span @click="changeLanguage('pl')" class="fi fi-pl"
+        :title="$t('polishLanguage')"></span>
+      </div>
+      <Menu v-if="!gameStarted" @startGame="startGame" />
+      <div v-if="gameStarted" class="grids">
+        <div class="phase">{{ $t(gamePhaseText) }}</div>
+        <OpponentGrid :ships="opponentShips" :showShips=false
+        :shots="playerShots" @cellSelected="handleUserShot"
+          :disabled="currentPlayer !== user"
+          :feedbackMessage=$t(opponentGridFeedbackMessage) />
+        <UserGrid :ships="playerShips" :shots="opponentShots"
+        @shipPlaced="onShipPlaced"
+          :feedbackMessage=$t(playerGridFeedbackMessage)
+          :shipsCanTouch="shipsCanTouch" />
+      </div>
+      <Help />
+      <div v-if="winner" class="modal">
+        <div class="modal-content">
+          <p>{{ $t(winnerMessage) }}</p>
+          <button @click="resetGame">{{ $t('playAgain') }}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import { v4 as uuidv4 } from 'uuid';
+import Header from './components/Header.vue';
+import UserGrid from './components/UserGrid.vue';
+import OpponentGrid from './components/OpponentGrid.vue';
+import Help from './components/Help.vue';
+import Menu from './components/Menu.vue';
+import GameApi from './api/GameApi';
+
+const FEEDBACK_OPPONENT_PLACEHOLDER = 'feedbackOpponentPlaceholder';
+const FEEDBACK_PLAYER_PLACEHOLDER = 'feedbackPlayerPlaceholder';
+const FEEDBACK_PLAYER_SINK = 'feedbackPlayerSink';
+const FEEDBACK_PLAYER_HIT = 'feedbackPlayerHit';
+const FEEDBACK_PLAYER_MISS = 'feedbackPlayerMiss';
+const FEEDBACK_OPPONENT_SINK = 'feedbackOpponentSink';
+const FEEDBACK_OPPONENT_HIT = 'feedbackOpponentHit';
+const FEEDBACK_OPPONENT_MISS = 'feedbackOpponentMiss';
+
+const WAITING_FOR_OPPONENT_SHIPS = 'waitingForOpponentToDeployShips';
+const WAITING_FOR_PLAYER_SHIPS = 'waitingForUserToDeployShips';
+const PLAYER_TURN = 'yourTurn';
+const OPPONENT_TURN = 'opponentsTurn';
+
+const GamePhase = Object.freeze({
+    WaitingForOpponentShips: 1,
+    WaitingForPlayerShips: 2,
+    PlayerTurn: 3,
+    OpponentTurn: 4
+});
+
+const Player = Object.freeze({
+    User: 1,
+    Opponent: 2
+});
+
+export default {
+  name: 'App',
+  components: {
+    Header,
+    UserGrid,
+    OpponentGrid,
+    Help,
+    Menu
+  },
+  data() {
+    return {
+      gameStarted: false,
+      gamePhase: GamePhase.WaitingForPlayerShips,
+      playerShips: [],
+      opponentShips: [],
+      playerShipsSet: false,
+      opponentShipsSet: false,
+      currentPlayer: null,
+      opponentShots: [],
+      playerShots: [],
+      winner: null,
+      opponentGridFeedbackMessage: FEEDBACK_OPPONENT_PLACEHOLDER,
+      playerGridFeedbackMessage: FEEDBACK_PLAYER_PLACEHOLDER,
+      sessionId: null,
+      shipsCanTouch: false,
+      user: Player.User
+    };
+  },
+  computed: {
+    gamePhaseText() {
+      switch (this.gamePhase) {
+        case GamePhase.WaitingForPlayerShips:
+          return WAITING_FOR_PLAYER_SHIPS;
+        case GamePhase.WaitingForOpponentShips:
+          return WAITING_FOR_OPPONENT_SHIPS;
+        case GamePhase.PlayerTurn:
+          return PLAYER_TURN;
+        case GamePhase.OpponentTurn:
+          return OPPONENT_TURN;
+        default:
+          return '';
+      }
+    },
+    winnerMessage() {
+      return this.winner === Player.User ? 'userWon' : 'aiWon';
+    }
+  },
+  methods: {
+    changeLanguage(lang) {
+      this.$i18n.locale = lang;
+    },
+    generateOrRetrieveSessionId() {
+      let sessionId = this.getCookie('sessionId');
+      if (!sessionId) {
+        sessionId = uuidv4();
+        this.setCookie('sessionId', sessionId, 365);
+        // Set cookie to expire in 1 year
+      }
+      this.sessionId = sessionId;
+      GameApi.setSessionId(this.sessionId);
+      // Set the session ID in the API client
+    },
+    getCookie(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(';').shift();
+    },
+    setCookie(name, value, days) {
+      const expires =
+        new Date(Date.now() + days * 864e5).toUTCString();
+      document.cookie =
+        `${name}=${value}; expires=${expires}; path=/`;
+    },
+    async startGame(shipsCanTouch) {
+      this.gameStarted = true;
+      try {
+        this.opponentShips = await GameApi.getOpponentShips();
+        this.opponentShipsSet = true;
+        this.shipsCanTouch = shipsCanTouch
+        this.checkPhaseTransition();
+      } catch (error) {
+        console.error('Failed to get opponent ships:', error);
+      }
+    },
+    async onShipPlaced(ships) {
+      this.playerShips = ships;
+      this.playerShipsSet = this.playerShips.length === 5;
+
+      if (this.playerShipsSet) {
+        try {
+          await GameApi.setUserShips(ships);
+          this.checkPhaseTransition();
+        } catch (error) {
+          console.error('Failed to set user ships:', error);
+        }
+      } else {
+        this.checkPhaseTransition();
+      }
+    },
+    checkPhaseTransition() {
+      if (this.playerShipsSet && this.opponentShipsSet) {
+        this.determineStartingPlayer();
+      } else if (this.playerShipsSet) {
+        this.gamePhase = GamePhase.WaitingForOpponentShips;
+      } else if (this.opponentShipsSet) {
+        this.gamePhase = GamePhase.WaitingForPlayerShips;
+      }
+    },
+    determineStartingPlayer() {
+      const randomStart = Math.random() < 0.5;
+      this.currentPlayer = randomStart 
+        ? Player.User 
+        : Player.Opponent;
+      this.gamePhase = randomStart 
+        ? GamePhase.PlayerTurn
+        : GamePhase.OpponentTurn;
+      if (!randomStart) {
+        this.opponentMove();
+      }
+    },
+    async opponentMove() {
+      if (this.currentPlayer !== Player.Opponent) return;
+      try {
+        const move = await GameApi.opponentShot();
+        await this.updateGameState();
+        this.playerGridFeedbackMessage = move.isHit 
+            ? (move.isSunk ? FEEDBACK_OPPONENT_SINK
+            : FEEDBACK_OPPONENT_HIT) : FEEDBACK_OPPONENT_MISS;
+
+        this.checkIfWinner(move, Player.Opponent);
+      } catch (error) {
+        console.error('Failed to get opponent move:', error);
+      }
+    },
+    async handleUserShot(x, y) {
+      if (this.currentPlayer !== Player.User) return;
+      try {
+        const move = await GameApi.userShot({ x, y });
+        await this.updateGameState();
+        this.opponentGridFeedbackMessage = move.isHit
+            ? (move.isSunk ? FEEDBACK_PLAYER_SINK
+            : FEEDBACK_PLAYER_HIT) : FEEDBACK_PLAYER_MISS;
+
+        this.checkIfWinner(move, Player.User);
+      } catch (error) {
+        console.error('Failed to handle user shot:', error);
+      }
+    },
+    async checkIfWinner(move, side) {
+      if(move.win == true){
+          this.winner = side;
+        } else {
+          this.switchTurn();
+        }
+    },
+    async updateGameState() {
+      try {
+        const gameState = await GameApi.getGameState();
+
+        this.playerShips
+            .splice(0, this.playerShips.length,
+                ...gameState.userShips);
+        this.opponentShips
+            .splice(0, this.opponentShips.length,
+                ...gameState.opponentShips);
+        this.playerShots
+            .splice(0, this.playerShots.length,
+                ...gameState.playerShots);
+        this.opponentShots
+            .splice(0, this.opponentShots.length,
+                ...gameState.opponentShots);
+        this.shipsCanTouch = gameState.shipsCanTouch;
+
+      } catch (error) {
+        console.error('Failed to update game state:', error);
+      }
+    },
+    switchTurn() {
+      this.currentPlayer = this.currentPlayer === Player.User
+        ? Player.Opponent
+        : Player.User;
+      this.gamePhase = this.currentPlayer === Player.User
+        ? GamePhase.PlayerTurn
+        : GamePhase.OpponentTurn;
+      if (this.currentPlayer === Player.Opponent) {
+        setTimeout(() => {
+          this.opponentMove();
+        }, 1000);
+      }
+    },
+    resetGame() {
+      this.gameStarted = false;
+      this.gamePhase = GamePhase.WaitingForPlayerShips;
+      this.playerShips = [];
+      this.opponentShips = [];
+      this.playerShipsSet = false;
+      this.opponentShipsSet = false;
+      this.currentPlayer = null;
+      this.opponentShots = [];
+      this.playerShots = [];
+      this.winner = null;
+      this.opponentGridFeedbackMessage = '';
+      this.playerGridFeedbackMessage = '';
+    }
+  },
+  mounted() {
+    this.generateOrRetrieveSessionId();
+  }
+};
+</script>
+
+<style>
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.language-switcher {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.language-switcher img {
+  cursor: pointer;
+  margin: 0 10px;
+}
+
+.grids {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.phase {
+  margin-bottom: 20px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  padding: 20px;
+  border: 1px solid #333;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+.modal-content {
+  text-align: center;
+}
+
+.language-switcher .fi {
+  margin-right: 8px; /* Add spacing between the span elements */
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+}
+
+.language-switcher .fi:last-child {
+  margin-right: 0; /* Remove right margin for the last element */
+}
+</style>
+
+\end{lstlisting}
+\end{addmargin}
+
+\subsubsection{UserGrid.vue}
+Komponent UserGrid.vue jest drugim najbardziej złożonym elementem aplikacji frontend. Wynika to z faktu, że konieczne było zaimplementowanie w nim logiki związanej z rozstawianiem statków na planszy gracza. Znajdują się tutaj metody takie jak isOccupied, isAdjacentOccupied, które sprawdzają czy dana pozycja statku jest możliwa do zrealizowania. Użytkownik dostaje informację zwrotną poprzez zmianę koloru statku na kolor zielony lub czerwony. Kolor zielony oznacza, że statek może być postawiony na danej pozycji.
+
+Kontrolowanie zasad byłoby również możliwe poprzez backend, ale uznano że jest to bardzo nieoptymalne rozwiązanie - w trakcie rozstawiania statków gracz może sprawdzać dziesiątki różnych pozycji zanim podejmie swoją decyzję. Odpytywanie tyle razy backendu niepotrzebnie by obciążało aplikację.
+
+
+\begin{addmargin}[0mm]{0mm}
+\begin{lstlisting}[
+    language=JavaScript,
+    numbers=left,
+    firstnumber=0,
+    caption={Główny komponent aplikacji App.vue},
+    aboveskip=0pt,
+    breaklines=true
+]
+<template>
+  <div class="grid">
+    <h2>{{ $t('playersGrid') }}</h2>
+    <div class="feedback" 
+        v-if="feedbackMessage">{{ feedbackMessage }}</div>
+    <div class="grid-container" @keydown="handleKeydown"
+        tabindex="0" ref="gridContainer">
+      <div class="row">
+        <div class="corner"></div>
+        <div v-for="label in columnLabels" :key="label"
+            class="column-label">{{ label }}</div>
+      </div>
+      <div v-for="(row, rowIndex) in rows" :key="rowIndex" 
+        class="row">
+        <div class="row-label">{{ rowLabels[rowIndex] }}</div>
+        <div v-for="cell in row" :key="cell.id" 
+            :class="['cell', getCellClass(rowIndex, cell.id)]">
+          <span v-if="isMissCell(rowIndex, cell.id)"
+            class="miss-marker">X</span>
+        </div>
+      </div>
+    </div>
+    <div class="controls">
+      <div class="control-row">
+        <button @click="handleKeydown({ key: 'ArrowUp' })">
+            ↑
+        </button>
+      </div>
+      <div class="control-row">
+        <button @click="handleKeydown({ key: 'ArrowLeft' })">
+            ←
+        </button>
+        <button @click="handleKeydown({ key: 'ArrowDown' })">
+            ↓
+        </button>
+        <button @click="handleKeydown({ key: 'ArrowRight' })">
+            →
+        </button>
+      </div>
+      <div class="control-row">
+        <button @click="handleKeydown({ key: 'r' })">
+        {{ $t('rotateButton') }}
+        </button>
+            <button @click="handleKeydown({ key: 'Enter' })">
+        {{ $t('deployButton') }}
+        </button>
+      </div>
+    </div>
+  </div>
+</template>
+
+
+<script>
+export default {
+  name: 'UserGrid',
+  props: {
+    ships: {
+      type: Array,
+      default: () => []
+    },
+    shots: {
+      type: Array,
+      default: () => []
+    },
+    feedbackMessage: {
+      type: String,
+      default: ''
+    },
+    shipsCanTouch: {
+      type: Boolean,
+      default: false
+    },
+  },
+  data() {
+    return {
+      // eslint-disable-next-line no-unused-vars
+      rows: Array.from({ length: 10 }, (_, rowIndex) =>
+        Array.from({ length: 10 }, (__, cellIndex) => ({
+          id: cellIndex,
+          label: ''
+        }))
+      ),
+      rowLabels: 'ABCDEFGHIJ'.split(''),
+      columnLabels: Array.from({ length: 10 }, (_, i) => i + 1),
+      placedShips: [],
+      currentShip: { size: 5, coordinates: [] },
+      currentShipDirection: 'horizontal',
+      currentShipPosition: { x: 5, y: 5 }
+    };
+  },
+  mounted() {
+    this.initCurrentShip();
+    window.addEventListener('keydown', this.handleKeydown);
+  },
+  beforeUnmount() {
+    window.removeEventListener('keydown', this.handleKeydown);
+  },
+  methods: {
+    initCurrentShip() {
+      this.updateCurrentShipCoordinates();
+    },
+    handleKeydown(event) {
+      if (this.currentShip.size === 0) return;
+      const key = event.key;
+      switch (key) {
+        case 'ArrowUp':
+          this.moveShip(-1, 0);
+          break;
+        case 'ArrowDown':
+          this.moveShip(1, 0);
+          break;
+        case 'ArrowLeft':
+          this.moveShip(0, -1);
+          break;
+        case 'ArrowRight':
+          this.moveShip(0, 1);
+          break;
+        case 'r':
+        case 'R':
+          this.rotateShip();
+          break;
+        case 'Enter':
+          this.placeShip();
+          break;
+      }
+    },
+    moveShip(dx, dy) {
+      const newPosition = { x: this.currentShipPosition.x + dx,
+        y: this.currentShipPosition.y + dy };
+      this.currentShipPosition = newPosition;
+      this.updateCurrentShipCoordinates();
+    },
+    rotateShip() {
+      const newDirection =
+        this.currentShipDirection === 'horizontal'
+            ? 'vertical'
+            : 'horizontal';
+      this.currentShipDirection = newDirection;
+      this.updateCurrentShipCoordinates();
+    },
+    isValidPosition(position, size, direction) {
+      for (let i = 0; i < size; i++) {
+        const x = direction === 'horizontal'
+            ? position.x
+            : position.x + i;
+        const y = direction === 'horizontal'
+            ? position.y + i 
+            : position.y;
+
+        if (x < 0 || x >= 10 || y < 0 || y >= 10 
+            || this.isOccupied(x, y)
+            || ( !this.shipsCanTouch
+                && this.isAdjacentOccupied(x, y))) {
+          return false;
+        }
+      }
+      return true;
+    },
+    isOccupied(x, y) {
+      return this.placedShips.some(ship =>
+        ship.coordinates.some(coord => coord.x === x && coord.y === y)
+      );
+    },
+    isAdjacentOccupied(x, y) {
+      const adjacentOffsets = [
+        { dx: -1, dy: -1 }, { dx: -1, dy: 0 }, { dx: -1, dy: 1 },
+        { dx: 0, dy: -1 }, { dx: 0, dy: 1 },
+        { dx: 1, dy: -1 }, { dx: 1, dy: 0 }, { dx: 1, dy: 1 }
+      ];
+
+      return adjacentOffsets.some(offset => {
+        const adjacentX = x + offset.dx;
+        const adjacentY = y + offset.dy;
+        return (
+          adjacentX >= 0 && adjacentX < 10 &&
+          adjacentY >= 0 && adjacentY < 10 &&
+          this.isOccupied(adjacentX, adjacentY)
+        );
+      });
+    },
+    updateCurrentShipCoordinates() {
+      this.currentShip.coordinates =
+        Array.from({ length: this.currentShip.size }, (_, i) => {
+        return this.currentShipDirection === 'horizontal'
+          ? { x: this.currentShipPosition.x,
+            y: this.currentShipPosition.y + i }
+          : { x: this.currentShipPosition.x + i,
+            y: this.currentShipPosition.y };
+      });
+    },
+    placeShip() {
+      if (this.isValidPosition(this.currentShipPosition,
+        this.currentShip.size,
+        this.currentShipDirection)) {
+        this.placedShips.push({ ...this.currentShip });
+        this.$emit('shipPlaced', this.placedShips,
+            this.currentShip.size);
+        this.updateNextShip();
+      }
+    },
+    updateNextShip() {
+      if (this.currentShip.size > 1) {
+        this.currentShip.size--;
+      } else {
+        this.currentShip = { size: 0, coordinates: [] };
+        // No more ships to place
+      }
+      this.currentShipPosition = { x: 5, y: 5 };
+      // Reset to middle
+      this.updateCurrentShipCoordinates();
+    },
+    getCellClass(rowIndex, cellIndex) {
+      if (this.isShotCell(rowIndex, cellIndex)) {
+        return this.isHitCell(rowIndex, cellIndex)
+            ? 'hit-cell'
+            : 'miss-cell';
+      }
+      if (this.isShipCell(rowIndex, cellIndex)) {
+        return 'ship-cell';
+      }
+      if (this.isCurrentShipCell(rowIndex, cellIndex)) {
+        return this.isValidPosition(this.currentShipPosition,
+            this.currentShip.size,
+            this.currentShipDirection)
+                ? 'valid-ship'
+                : 'invalid-ship';
+      }
+      return '';
+    },
+    isShotCell(rowIndex, cellIndex) {
+      return this.shots.some(shot => shot.x === rowIndex
+        && shot.y === cellIndex);
+    },
+    isHitCell(rowIndex, cellIndex) {
+      return this.shots.some(shot => shot.x === rowIndex
+        && shot.y === cellIndex && shot.isHit);
+    },
+    isMissCell(rowIndex, cellIndex) {
+      const shot = this.shots.find(shot => shot.x === rowIndex
+        && shot.y === cellIndex);
+      return shot && !shot.isHit;
+    },
+    isShipCell(rowIndex, cellIndex) {
+      return this.placedShips.some(ship =>
+        ship.coordinates.some(coord => coord.x === rowIndex
+            && coord.y === cellIndex)
+      );
+    },
+    isCurrentShipCell(rowIndex, cellIndex) {
+      return this.currentShip.coordinates
+        .some(coord => coord.x === rowIndex
+        && coord.y === cellIndex);
+    }
+  }
+};
+</script>
+
+
+<style scoped>
+.grid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.feedback {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.grid-container {
+  display: grid;
+  grid-template-columns: 30px repeat(10, 30px);
+  grid-template-rows: 30px repeat(10, 30px);
+  gap: 2px;
+}
+
+.grid-container:focus {
+  outline: none;
+}
+
+.row {
+  display: contents;
+}
+
+.cell,
+.column-label,
+.row-label {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cell {
+  background-color: lightblue;
+  border: 1px solid #333;
+}
+
+.valid-ship {
+  background-color: lightgreen;
+}
+
+.invalid-ship {
+  background-color: lightcoral;
+}
+
+.hit-cell {
+  background-color: red;
+}
+
+.miss-cell {
+  background-color: white;
+  position: relative;
+}
+
+.miss-marker {
+  color: black;
+  font-size: 24px;
+  position: absolute;
+}
+
+.ship-cell {
+  background-color: darkblue;
+}
+
+.column-label,
+.row-label {
+  background-color: #f0f0f0;
+  font-weight: bold;
+}
+
+.corner {
+  background-color: #f0f0f0;
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.control-row {
+  display: flex;
+  justify-content: center;
+  margin: 5px 0;
+}
+
+.controls button {
+  margin: 0 5px;
+  padding: 10px 20px;
+  font-size: 16px;
+}
+</style>
+\end{lstlisting}
+\end{addmargin}
+
+
+\subsubsection{GameApi}
+Plik GameApi.js zawiera definicje metod wykorzystywanych do odpytywania aplikacji backend poprzez zapytania AJAX. W tym celu wykorzystano klienta Axios. Do każdego zapytania dołączany jest header "X-Session-Id", który potrzebny jest do identyfikacji danej sesji gry.
+
+\begin{addmargin}[0mm]{0mm}
+\begin{lstlisting}[
+    language={JavaScript},
+    numbers=left,
+    firstnumber=5,
+    caption={Plik GameApi.js},
+    aboveskip=0pt
+]
+import axios from 'axios';
+
+const apiClient = axios.create({
+  baseURL: process.env.VUE_APP_API_URL,
+  withCredentials: true,
+  // Include credentials (cookies) with requests
+  headers: {
+    'Content-Type': 'application/json'
+  }
+});
+
+let sessionId = null;
+
+function setSessionId(id) {
+  sessionId = id;
+}
+
+apiClient.interceptors.request.use(config => {
+  if (sessionId) {
+    config.headers['X-Session-Id'] = sessionId;
+  }
+  return config;
+});
+
+export default {
+  setSessionId,
+  async getAiTypes(shipsCanTouch) {
+    const response = await apiClient.post('/AiType/list',
+        shipsCanTouch);
+    return response.data;
+  },
+  async selectAiType(type) {
+    await apiClient.post('/AiType/select', type);
+  },
+  async updateRules(shipsCanTouch) {
+    await apiClient.post('/Rules/update', shipsCanTouch);
+  },
+  async getOpponentShips() {
+    const response = await apiClient.get('/ShipLocations/opponent');
+    return response.data;
+  },
+  async setUserShips(shipData) {
+    await apiClient.post('/ShipLocations/user', shipData);
+  },
+  async userShot(position) {
+    const response = await apiClient.post('shot/user', position);
+    return response.data;
+  },
+  async opponentShot() {
+    const response = await apiClient.get('shot/opponent');
+    return response.data;
+  },
+  async getGameState() {
+    const response = await apiClient.get('gamestate/get');
+    return response.data;
+  },
+  async clearGameState() {
+    await apiClient.get('gamestate/clear');
+  }
+};
+
+\end{lstlisting}
+\end{addmargin}
+
+\subsection{Backend}
+
+\subsubsection{Program.cs}
+
+Najważniejszy element aplikacji backend. Służy do konfiguracji aplikacji, na przykład poprzez pozwolenie na CORS (Cross-Origin Resource Sharing) - dzięki temu frontend może wykonywać zapytania do backendu pomimo tego, że oba znajdują się w innych domenach. Program.cs umożliwia również rejestrowania serwisów, co jest konieczne aby później korzystać ze wstrzykiwania zależności (Dependency injection). 
+
+\begin{addmargin}[0mm]{0mm}
+\begin{lstlisting}[
+    language={[Sharp]C},
+    numbers=left,
+    firstnumber=0,
+    caption={Klasa ShotController.cs},
+    aboveskip=0pt
+]
+using Battleships.Common.Settings;
+using Battleships.Core.Services;
+using Battleships.Services.Interfaces;
+using Battleships.WebApi;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container.
+builder.Services.AddControllers();
+builder.Services.AddMemoryCache();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+    options.Cookie.SameSite = SameSiteMode.None;
+    // to allow cross-site requests
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+
+});
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSpecificOrigin",
+        builder =>
+        {
+            builder.WithOrigins("http://localhost:8080",
+                "https://kalina559.github.io") // frontend URL
+                   .AllowAnyMethod()
+                   .AllowAnyHeader()
+                   .AllowCredentials();
+
+        });
+});
+
+builder.Services.AddScoped<IShipLocationService,
+    ShipLocationService>();
+builder.Services.AddScoped<IGenerateMoveService,
+    GenerateMoveService>();
+builder.Services.AddScoped<IGameStateService,
+    GameStateService>();
+builder.Services.AddScoped<IAiTypeService,
+    AiTypeService>();
+builder.Services.AddScoped<IRuleTypeService,
+    RuleTypeService>();
+builder.Services.AddScoped<ICosmosDbService,
+    CosmosDbService>();
+
+var cosmosDbSettings = new CosmosDbSettings();
+builder.Configuration.Bind(nameof(CosmosDbSettings),
+    cosmosDbSettings);
+builder.Services.AddSingleton(cosmosDbSettings);
+
+ServiceCollectionSetup.InitializeCosmosClientInstanceAsync(
+cosmosDbSettings, builder.Services);
+
+
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+
+var app = builder.Build();
+
+app.UseSwagger();
+app.UseSwaggerUI();
+app.UseDeveloperExceptionPage();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
+
+app.UseHttpsRedirection();
+app.UseRouting();
+app.UseCors("AllowSpecificOrigin");
+app.UseSession();
+app.UseAuthorization();
+
+app.MapControllers();
+
+app.Run();
+\end{lstlisting}
+\end{addmargin}
+
+\subsubsection{Przykładowy endpoint RESTful API}
+
+\begin{addmargin}[0mm]{0mm}
+\begin{lstlisting}[
+    language={[Sharp]C},
+    numbers=left,
+    firstnumber=0,
+    caption={Klasa ShotController},
+    aboveskip=0pt
+]
+
+using Battleships.Common.GameClasses;
+using Battleships.Services.Interfaces;
+using Microsoft.AspNetCore.Mvc;
+
+namespace Battleships.WebApi.Controllers
+{
+    [ApiController]
+    [Route("api/[controller]")]
+    public class ShotController(
+        IGameStateService gameStateService,
+        IGenerateMoveService opponentMoveService)
+        : ControllerBase
+    {
+        [HttpPost("user")]
+        public IActionResult UserShot([FromBody] Shot shot)
+        {
+            var result = gameStateService
+                .ProcessShot(shot.X, shot.Y, isPlayer: true);
+            var win = gameStateService.CheckWinCondition();
+            return Ok(new { result.IsHit,
+                result.IsSunk,
+                Win = win });
+        }
+
+        [HttpGet("opponent")]
+        public IActionResult OpponentShot()
+        {
+            var gameState = gameStateService.GetGameState();
+            var (X, Y) = opponentMoveService.GenerateMove(
+                gameState.OpponentShots,
+                gameState.UserShips,
+                gameState.ShipsCanTouch,
+                gameState.OpponentAiType);
+
+            var result = gameStateService
+                .ProcessShot(X, Y, isPlayer: false);
+            var win = gameStateService.CheckWinCondition();
+            return Ok(
+                new { 
+                    result.IsHit,
+                    result.IsSunk,
+                    Win = win });
+        }
+    }
+}
+
+\end{lstlisting}
+\end{addmargin}
+
+
+\subsubsection{GameStateService}
+
+GameStateService to klasa, która obsługuje kluczowe elementy rozgrywki. Za pomocą MemoryCache zapisuje i odczytuje instancje GameState, które trzymają informację o rozgrywce dla danego SessionId. Tutaj odbywa się też procesowanie strzałów, a więc sprawdzanie czy któryś ze statków gracza lub przeciwnika został trafiony. GameStateService kontroluje również czy rozgrywka nie została zakończona, ponieważ któraś ze stron zatopiła już wszystkie statki przeciwnika - jeśli tak, to przebieg gry zostaje zapisany jako dokument JSON w bazie danych Cosmos DB.
+
+\begin{addmargin}[0mm]{0mm}
+\begin{lstlisting}[
+    language={[Sharp]C},
+    numbers=left,
+    firstnumber=0,
+    caption={Klasa GameStateService},
+    aboveskip=0pt
+]
+using Battleships.Common.CosmosDb;
+using Battleships.Common.GameClasses;
+using Battleships.Core.Exceptions;
+using Battleships.Services.Interfaces;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using Microsoft.Extensions.Hosting;
+using Microsoft.AspNetCore.Hosting;
+
+namespace Battleships.Core.Services
+{
+    public class GameStateService(
+        IHttpContextAccessor httpContextAccessor,
+        ILogger<GameStateService> logger,
+        IMemoryCache memoryCache,
+        ICosmosDbService cosmosDbService,
+        IHostEnvironment env) : IGameStateService
+    {
+        public GameState GetGameState()
+        {
+            var sessionId = httpContextAccessor.HttpContext
+                .Request.Headers["X-Session-Id"].ToString();
+
+            if (!memoryCache.TryGetValue(sessionId, out string? gameStateJson))
+            {
+                logger.LogInformation(
+                    "No game state found in cache for session ID: {sessionId}",
+                        sessionId);
+                return new GameState();
+            }           
+
+            var deserializedGameState = DeserializeGameStateJson(gameStateJson);
+
+            logger.LogInformation(
+                "Game state retrieved from cache for session ID: {sessionId}",
+                    sessionId);
+            return deserializedGameState;
+        }
+
+        public void SaveGameState(GameState gameState)
+        {
+            var sessionId = httpContextAccessor.HttpContext
+            .Request.Headers["X-Session-Id"].ToString();
+            if (string.IsNullOrEmpty(sessionId))
+            {
+                logger.LogWarning(
+                    "Session ID is missing in the request headers.");
+                return;
+            }
+
+            var gameStateJson = JsonConvert.SerializeObject(gameState);
+            memoryCache.Set(sessionId, gameStateJson);
+            logger.LogInformation(
+                "Game state saved in cache for session ID: {sessionId}",
+                    sessionId);
+        }
+
+        public ShotResult ProcessShot(int x, int y, bool isPlayer)
+        {
+            var gameState = GetGameState();
+            var targetShips = isPlayer
+                ? gameState.OpponentShips
+                : gameState.UserShips;
+            var shotList = isPlayer 
+                ? gameState.PlayerShots 
+                : gameState.OpponentShots;
+
+            var hit = targetShips.Any(
+                ship => ship.Coordinates
+                    .Any(coord => coord.X == x
+                        && coord.Y == y));
+            shotList.Add(new Shot { X = x, Y = y,
+                IsHit = hit });
+            bool isSunk = false;
+
+            if (hit)
+            {
+                var ship = targetShips.First(
+                    s => s.Coordinates
+                        .Any(coord => coord.X == x
+                            && coord.Y == y));
+                var shipSank =
+                    ship.Coordinates.All(
+                    coord => shotList
+                        .Any(shot => shot.X == coord.X
+                            && shot.Y == coord.Y));
+                if (shipSank)
+                {
+                    ship.IsSunk = true;
+                    isSunk = true;
+                }
+            }
+
+            SaveGameState(gameState);
+
+            return new ShotResult { IsHit = hit,
+                IsSunk = isSunk };
+        }
+
+        public bool CheckWinCondition(bool testMode = false)
+        {
+            var gameState = GetGameState();
+
+            var allPlayerShipsSunk =
+                gameState.UserShips.All(ship => ship.IsSunk);
+            var allOpponentShipsSunk =
+                gameState.OpponentShips.All(ship => ship.IsSunk);
+
+            if (allPlayerShipsSunk || allOpponentShipsSunk)
+            {
+                SaveGameSessionToDb(gameState,
+                    playerWon: allOpponentShipsSunk, testMode);
+                return true;
+            }
+
+            return false;
+        }
+
+        private void SaveGameSessionToDb(GameState gameState,
+            bool playerWon, bool testMode)
+        {
+            if (env.IsProduction() || testMode)
+            {
+                var gameSession = new GameSession
+                {
+                    Id = Guid.NewGuid(),
+                    GameStateJson = JsonConvert.SerializeObject(gameState),
+                    SessionId =
+                        httpContextAccessor.HttpContext.
+                            Request.Headers["X-Session-Id"].ToString(),
+                    DateCreated = DateTime.UtcNow,
+                    PlayerAiType = (int?)gameState.PlayerAiType,
+                    OpponentAiType = (int)gameState.OpponentAiType,
+                    ShipsCanTouch = gameState.ShipsCanTouch,
+                    OpponentShipsSunk =
+                        gameState.OpponentShips
+                            .Where(x => x.IsSunk).Count(),
+                    PlayersShipsSunk =
+                        gameState.UserShips
+                            Where(x => x.IsSunk).Count(),
+                    OpponentMovesCount = gameState.OpponentShots.Count(),
+                    PlayerMovesCount = gameState.PlayerShots.Count(),
+                    PlayerWon = playerWon
+                };
+
+                cosmosDbService.AddGameSessionAsync(gameSession, testMode);
+            }
+        }
+
+        public void ClearGameState()
+        {
+            var gameState = new GameState
+            {
+                UserShips = [],
+                OpponentShips = [],
+                PlayerShots = [],
+                OpponentShots = []
+            };
+            SaveGameState(gameState);
+        }
+
+        private static GameState DeserializeGameStateJson(string? gameStateJson)
+        {
+            if (gameStateJson == null)
+            {
+                throw new NullGameStateException(
+                    $"Game state JSON was found but was null.");
+            }
+
+            var gameState = JsonConvert
+                .DeserializeObject<GameState>(gameStateJson);
+
+            return gameState ??
+                throw new NullGameStateException(
+                    $"Game state JSON was found but was null after deserialization");
+        }
+    }
+}
+\end{lstlisting}
+\end{addmargin}
+
+
+\subsubsection{GridHelper}
+
+GridHelper jest statyczną klasą pomocniczą, która zapewnia wiele metod używanych przez algorytmy do analizowania planszy przeciwnika. Umożliwia między innymi sprawdzanie czy dana komórka jest dostępna do ostrzału, czy jest częścią zatopionego statku, czy jest trafiona, etc.
+
+\begin{addmargin}[0mm]{0mm}
+\begin{lstlisting}[
+    language={[Sharp]C},
+    numbers=left,
+    firstnumber=0,
+    caption={Klasa GridHelper},
+    aboveskip=0pt
+]
+using Battleships.Common.GameClasses;
+using System.Diagnostics;
+
+namespace Battleships.Common.Helpers
+{
+    public static class GridHelper
+    {
+        public static IEnumerable<(int X, int Y)> GetAllAdjacentCells(
+            int x, int y)
+        {
+            return GetSideAdjacentCells(x, y)
+                .Concat(GetEdgeAdjacentCells(x, y));
+        }
+
+        /// <summary>
+        /// Gets all cells that are touching the sides
+        /// of the cell with (x,y) coordinates
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
+        public static IEnumerable<(int X, int Y)> 
+            GetSideAdjacentCells(int x, int y)
+        {
+            return new List<(int X, int Y)>
+    {
+        (x - 1, y), (x + 1, y),
+        (x, y - 1), (x, y + 1)
+    };
+        }
+
+        /// <summary>
+        /// Gets all cells that are touching
+            the edges of the cell with (x,y) coordinates
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
+        public static IEnumerable<(int X, int Y)> GetEdgeAdjacentCells(
+            int x, int y)
+        {
+            return new List<(int X, int Y)>
+    {
+        (x - 1, y - 1), (x - 1, y + 1),
+        (x + 1, y - 1), (x + 1, y + 1)
+    };
+        }
+
+        public static bool IsValidShipPosition(
+            List<Shot> previousShots,
+            List<Ship> opponentShips,
+            bool shipsCanTouch,
+            int x, int y,
+            int length,
+            bool isVertical)
+        {
+            int maxLength = isVertical ? x + length : y + length;
+            if (maxLength > 10) return false;
+
+            for (int i = 0; i < length; i++)
+            {
+                int currentX = isVertical ? x + i : x;
+                int currentY = isVertical ? y : y + i;
+
+                if (!shipsCanTouch && IsEdgeAdjacentCellHit(
+                    previousShots,
+                    currentX,
+                    currentY))
+                {
+                    return false;
+                }
+
+                if (!(IsCellAvailable(previousShots, currentX, currentY)
+                      || (IsCellHit(previousShots, currentX, currentY)
+                        && !IsPartOfSunkShip(currentX, currentY, opponentShips))))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public static bool IsCellAvailable(List<Shot> previousShots, int x, int y)
+        {
+            var shot = previousShots.FirstOrDefault(s => s.X == x && s.Y == y);
+            return shot == null;
+        }
+
+        public static bool IsWithinBounds(int x, int y)
+        {
+            return x >= 0 && x < 10 && y >= 0 && y < 10;
+        }
+
+        public static bool 
+            IsPartOfSunkShip(int x, int y, List<Ship> opponentShips)
+        {
+            return opponentShips
+                .Any(ship => ship.IsSunk && ship.Coordinates
+                    .Any(coord => coord.X == x && coord.Y == y));
+        }        
+
+        public static bool IsCellHit(List<Shot> previousShots, int x, int y)
+        {
+            var shot = previousShots.FirstOrDefault(s => s.X == x && s.Y == y);
+            return shot != null && shot.IsHit;
+        }
+
+        public static bool IsEdgeAdjacentCellHit(
+            List<Shot> previousShots, int x, int y)
+        {
+            var edgeAdjacentCells = GetEdgeAdjacentCells(x, y);
+            var hit = edgeAdjacentCells
+                .Any(cell => previousShots
+                    .Any(shot => cell.X == shot.X 
+                        && cell.Y == shot.Y && shot.IsHit));
+
+            return hit;
+        }
+
+        public static void PrintProbabilityGrid(
+            int[] probabilityMap,
+            int rows, int columns)
+        {
+            int[,] grid = new int[rows, columns];
+
+            var mapElements =
+                probabilityMap.Select((prob, index) => (prob, index)).ToList();
+
+            foreach (var (probability, index) in mapElements)
+            {
+
+                int y = index / 10;
+                int x = index % 10;
+                grid[y, x] = probability;
+            }
+
+            for (int y = 0; y < rows; y++)
+            {
+                for (int x = 0; x < columns; x++)
+                {
+                    Console.Write($"{grid[x, y],4}");
+                }
+                Console.WriteLine();
+            }
+        }
+
+        public static void PrintGrid(bool[,] grid, int rows, int columns)
+        {
+
+            for (int y = 0; y < rows; y++)
+            {
+                for (int x = 0; x < columns; x++)
+                {
+                    Debug.Write($"{Convert.ToInt32(grid[x, y]),4}");
+                }
+
+                Debug.Write("\n");
+            }
+
+            Debug.Write("\n");
+        }
+
+        public static void OrderHitCluster(ref List<(int X, int Y)> cluster)
+        {
+            cluster = [.. cluster.OrderBy(cell => cell.Y)
+                .ThenBy(cell => cell.X)];
+        }
+    }
+}
+
+\end{lstlisting}
+\end{addmargin}
+
+
+
+
+
+\subsubsection{HeuristicHelper}
+
+HeuristicHelper jest statyczna klasą pomocniczą, podobnie jak GridHelper z rodziału 1.2.4. Metody zawarte w tej klasie są jednak bardziej bezpośrednio związane z algorytmami decyzyjnymi. Metody te pozwalają na zwiększanie wartości komórek na mapie prawdopodobieństwa w zależności od tego ile wariacji statków może znajdować się na danej komórce, czy sąsiaduje z trafieniem bądź serią trafień, etc.
+
+\begin{addmargin}[0mm]{0mm}
+\begin{lstlisting}[
+    language={[Sharp]C},
+    numbers=left,
+    firstnumber=0,
+    caption={Klasa HeuristicHelper},
+    aboveskip=0pt
+]
+
+using Battleships.Common.GameClasses;
+
+namespace Battleships.Common.Helpers
+{
+    public static class HeuristicHelper
+    {
+        public static void AdjustProbabilityForShipLocations(
+            List<Shot> previousShots,
+            List<Ship> opponentShips,
+            bool shipsCanTouch,
+            int[] probabilityMap,
+            int weight,
+            bool dynamicWeight = false,
+            int dynamicPower = 1)
+        {
+            var remainingShipLengths = opponentShips
+                .Where(ship => !ship.IsSunk)
+                .Select(ship => ship.Coordinates.Count)
+                .ToList();
+
+            foreach (var length in remainingShipLengths)
+            {
+                for (int x = 0; x < 10; x++)
+                {
+                    for (int y = 0; y < 10; y++)
+                    {
+                        if (GridHelper.IsValidShipPosition(
+                            previousShots,
+                            opponentShips,
+                            shipsCanTouch, x, y,
+                            length, isVertical: true))
+                        {
+                            for (int i = 0; i < length; i++)
+                            {
+                                probabilityMap[(y * 10) + x + i]
+                                += dynamicWeight 
+                                    ? weight * (int)Math.Pow(length, dynamicPower) 
+                                    : weight;
+                            }
+                        }
+
+                        if (GridHelper.IsValidShipPosition(
+                            previousShots,
+                            opponentShips,
+                            shipsCanTouch, x, y,
+                            length, isVertical: false))
+                        {
+                            for (int i = 0; i < length; i++)
+                            {
+                                probabilityMap[((y + i) * 10) + x]
+                                += dynamicWeight
+                                ? weight * (int)Math.Pow(length, dynamicPower)
+                                : weight;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        public static int AdjustProbabilityForHitClusters(
+            List<Shot> previousShots,
+            List<Ship> opponentShips,
+            int[] probabilityMap,
+            int singleHitWeight,
+            int clusterWeight)
+        {
+            var hitClusters = FindHitClusters(previousShots, opponentShips);
+            foreach (var cluster in hitClusters)
+            {
+                if (cluster.Count > 1)
+                {
+                    var (startX, startY) = cluster.First();
+                    var (endX, endY) = cluster.Last();
+
+                    var isHorizontal = startX == endX;
+
+                    if (isHorizontal)
+                    {
+                        // Increase probability for cells
+                        // extending the horizontal cluster
+                        IncreaseProbabilityForCell(
+                            previousShots,
+                            startX, startY - 1,
+                            probabilityMap, 
+                            clusterWeight);
+                        IncreaseProbabilityForCell(
+                            previousShots,
+                            endX, endY + 1,
+                            probabilityMap,
+                            clusterWeight);
+                    }
+                    else
+                    {
+                        // Increase probability for cells
+                        // extending the vertical cluster
+                        IncreaseProbabilityForCell(previousShots,
+                            startX - 1,
+                            startY,
+                            probabilityMap, 
+                            clusterWeight);
+                        IncreaseProbabilityForCell(
+                            previousShots,
+                            endX + 1, endY,
+                            probabilityMap,
+                            clusterWeight);
+                    }
+                }
+                else
+                {
+                    AdjustProbabilityForSingleHit(
+                        previousShots,
+                        probabilityMap,
+                        cluster.First(),
+                        singleHitWeight);
+                }
+            }
+
+            return hitClusters.Count();
+        }
+
+        public static List<List<(int X, int Y)>> FindHitClusters(
+            List<Shot> previousShots, List<Ship> opponentShips)
+        {
+            var hitClusters = new List<List<(int X, int Y)>>();
+
+            var visited = new bool[10, 10];
+
+            foreach (var shot in previousShots
+                .Where(s => s.IsHit 
+                    && !GridHelper.IsPartOfSunkShip(s.X, s.Y, opponentShips)))
+            {
+                if (!visited[shot.X, shot.Y])
+                {
+                    var cluster = new List<(int X, int Y)>();
+                    var queue = new Queue<(int X, int Y)>();
+
+                    queue.Enqueue((shot.X, shot.Y));
+
+                    while (queue.Count > 0)
+                    {
+                        var (cx, cy) = queue.Dequeue();
+
+                        if (visited[cx, cy]) continue;
+
+                        visited[cx, cy] = true;
+                        cluster.Add((cx, cy));
+
+                        foreach (var (X, Y) 
+                            in GridHelper.GetSideAdjacentCells(cx, cy))
+                        {
+                            if (GridHelper.IsWithinBounds(X, Y)
+                                && !visited[X, Y])
+                            {
+                                var adjacentShot
+                                    = previousShots.FirstOrDefault(
+                                        s => s.X == X
+                                            && s.Y == Y
+                                            && s.IsHit);
+                                if (adjacentShot != null
+                                    && !GridHelper.IsPartOfSunkShip(
+                                        adjacentShot.X,
+                                        adjacentShot.Y,
+                                        opponentShips))
+                                {
+                                    queue.Enqueue((X, Y));
+                                }
+                            }
+                        }
+                    }
+
+                    if (cluster.Count > 0)
+                    {
+                        GridHelper.OrderHitCluster(ref cluster);
+                        hitClusters.Add(cluster);
+                    }
+                }
+            }
+
+            return hitClusters;
+        }
+
+        public static void AdjustProbabilityForSingleHit(
+            List<Shot> previousShots,
+            int[] probabilityMap,
+            (int X, int Y) hit,
+            int weight)
+        {
+            var adjacentCells
+                = GridHelper.GetSideAdjacentCells(
+                    hit.X,
+                    hit.Y);
+
+            foreach (var (X, Y) in adjacentCells)
+            {
+                IncreaseProbabilityForCell(
+                    previousShots, X, Y,
+                    probabilityMap, weight);
+            }
+        }
+        public static void IncreaseProbabilityForCell(
+            List<Shot> previousShots,
+            int x, int y,
+            int[] probabilityMap,
+            int weight)
+        {
+            if (GridHelper.IsWithinBounds(x, y)
+                && GridHelper.IsCellAvailable(previousShots, x, y))
+            {
+                probabilityMap[y * 10 + x] += weight;
+            }
+        }
+
+        public static void AdjustProbabilityForShotAtCells(
+            List<Shot> previousShots,
+            int[] probabilityMap)
+        {
+            for (int x = 0; x < 10; x++)
+            {
+                for (int y = 0; y < 10; y++)
+                {
+                    if (!GridHelper.IsCellAvailable(previousShots, x, y))
+                    {
+                        probabilityMap[(y * 10) + x] = 0;
+                    }
+                }
+            }
+        }
+
+        public static void AdjustProbabilityForSunkShips(
+            List<Ship> opponentShips, int[] probabilityMap)
+        {
+            foreach (var ship in opponentShips.Where(ship => ship.IsSunk))
+            {
+                foreach (var coord in ship.Coordinates)
+                {
+                    var adjacentCells = GridHelper.GetAllAdjacentCells(
+                        coord.X, coord.Y);
+                    foreach (var (X, Y) in adjacentCells)
+                    {
+                        if (GridHelper.IsWithinBounds(X, Y))
+                        {
+                            probabilityMap[(Y * 10) + X] = 0;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+\end{lstlisting}
+\end{addmargin}
+
+
+
+
+
+
+
+
+
+
+
+\begin{addmargin}[0mm]{0mm}
+\begin{lstlisting}[
+    language={[Sharp]C},
+    numbers=left,
+    firstnumber=0,
+    caption={Klasa ShotController.cs},
+    aboveskip=0pt
+]
+\end{lstlisting}
+\end{addmargin}

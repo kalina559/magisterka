@@ -1,0 +1,29 @@
+\newpage % Rozdziały zaczynamy od nowej strony.
+\section{Podsumowanie}
+
+W rozdziale 1.3 postawione zostały 3 pytania:
+
+\begin{enumerate}
+    \item Który algorytm decyzyjny jest najbardziej skuteczny?
+    \item Co ma wpływ na skuteczność algorytmów?
+    \item Czy skuteczność algorytmów różni się w zależności od tego czy gra przeciwko człowiekowi, czy innemu algorytmowi?
+\end{enumerate}
+
+Na podstawie testów oraz analizy wyników podjęto próbę odpowiedzi na powyższe pytania.
+
+Najbardziej skutecznym algorytmem okazał się algorytm oparty na heurystykach maksymalizacji zysku oraz najbardziej prawdopodobnej lokalizacji na podstawie trafień, aczkolwiek nie miał on zbyt dużej przewagi nad swoją rozszerzoną wersję, priorytetyzującą dłuższe statki.
+
+Największy wpływ na skuteczność algorytmów miała minimalizacji możliwych rozmieszczeń statków, dzięki heurystyce maksymalizacji zysku ze strzału. Strategiczne ostrzeliwanie komórek, na których może leżeć wiele różnych wariantów statków, prowadzi do zawężenia późniejszych rozważań, a co za tym idzie, szybszego (i zwycięskiego) zakończenia rozgrywki.
+
+Niestety, nie udało się zebrać wystarczająco dużo danych, aby przeprowadzić dogłębną analizę skuteczności przeciwko ludziom. Jednak nawet przy małej próbie badawczej widać, że algorytmy oparte na zaimplementowanych heurystykach są znacznie skuteczniejsze od algorytmów losowych. Istnieje duża szansa, że dalsze badania mogłyby dać podobne wyniki do analizy opartej na starciach pomiędzy algorytmami.
+
+\subsection{Przyszłe kierunki badań}
+
+Napisana w ramach pracy magisterskiej aplikacja pozostawia wiele możliwości do dalszego rozwoju i badań:
+\begin{itemize}
+    \item Dokładniejsza analiza skuteczności przeciwko ludziom. W tym celu należałoby zebrać dużo więcej danych - co najmniej tyle ile w przypadku analizy starć algorytm-algorytm. Potrzebne by było zatem 1000 rozgrywek dla każdego algorytmu, w obu wariantach zasad. Zaimplementowano 7 algorytmów, w tym jeden, który dostępny jest tylko gdy statki nie mogą się ze sobą stykać - ostateczna liczba potrzebna do dokładnej analizy to 13 000 rozgrywek.
+    \item Implementacja algorytmów decyzyjnych do rozstawiania statków. W tym celu można by wykorzystać istniejące algorytmy, ale "odwrócić" ich działanie. Nowe algorytmy unikałyby najbardziej prawdopodobnych lokalizacji statków.
+    \item Wykorzystanie uczenia maszynowego do implementacji kolejnych algorytmów decyzyjnych przeciwnika. Dane zebrane podczas rozgrywek człowiek-algorytm oraz algorytm-algorytm mogłyby służyć jako zbiór danych treningowych. 
+\end{itemize}
+
+\indent\ 
