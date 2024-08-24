@@ -2,7 +2,7 @@
 \section{Analiza skuteczności algorytmów}
 
 \subsection{Metody testowania}
-\indent\ Testy zostały przeprowadzone za pomocą testów jednostkowych, w których wszystkie algorytmy zostały zestawione przeciwko sobie. Statki były rozstawione losowo dla obu stron. Wszystkie testy jednostkowe dziedziczą po klasie bazowej AlgorithmTestBase, która była potrzebna do inicjalizacji lub zmockowania wszelkich potrzebnych serwisów. Na listingu 12 widoczny jest przykładowy test jednostkowy. Testowane były oba warianty zasady stykania się statków. Stała numberOfIterations wynosiła 1000, więc dla każdego zestawienia algorytmów i zasad otrzymano 1000 wyników. Ogólnie podczas testów zebrano około 40 000 rekordów w kontenerze TestGameSessions.
+\indent\ Testy zostały przeprowadzone za pomocą testów jednostkowych, w których wszystkie algorytmy zostały zestawione przeciwko sobie. Statki były rozstawione losowo dla obu stron. Wszystkie testy jednostkowe dziedziczą po klasie bazowej \emph{AlgorithmTestBase}, która była potrzebna do inicjalizacji lub zmockowania wszelkich potrzebnych serwisów. Na listingu 12 widoczny jest przykładowy test jednostkowy. Testowane były oba warianty zasady stykania się statków. Stała \emph{numberOfIterations} wynosiła 1000, więc dla każdego zestawienia algorytmów i zasad otrzymano 1000 wyników. Ogólnie podczas testów zebrano około 40 000 rekordów w kontenerze \emph{TestGameSessions}.
 
 \begin{addmargin}[10mm]{0mm}
 \begin{lstlisting}[
@@ -56,7 +56,7 @@ W tabelach przedstawiających skuteczność poszczególnych algorytmów posłuż
 
 \subsubsection{Algorytm losowy}
 
-Algorytm losowy, zgodnie z przewidywaniami wypadł najgorzej w zestawieniu z innymi algorytmami. W tabeli 6.1 widać, że najwyższy procent zwycięstw jaki osiągnął to 13,1\% przeciwko algorytmowi losowemu rozszerzonemu. Wśród wyników można zaobserwować prawidłowość, że skuteczność delikatnie wzrasta w przypadku testów, gdzie statki mogą się stykać. Zgodnie z tym co zostało wspomniane pod koniec rozdziału 2.2, dodatkowe ograniczenie tego, jak mogą być rozstawione statki, ułatwia heurystykom analizę planszy przeciwnika. Gdy tego ograniczenia nie ma, gra staje się trochę bardziej losowa - chociaż nadal algorytmy oparte na heurystykach są znacznie skuteczniejsze od algorytmu losowego.
+Algorytm losowy, zgodnie z przewidywaniami wypadł najgorzej w zestawieniu z innymi algorytmami. Z tabeli 6.1 wynika, że najwyższy procent zwycięstw jaki osiągnął to 13,1\% przeciwko algorytmowi losowemu rozszerzonemu. Wśród wyników można zaobserwować prawidłowość, że skuteczność delikatnie wzrasta w przypadku testów, gdzie statki mogą się stykać. Zgodnie z tym, co opisano pod koniec rozdziału 2.2, dodatkowe ograniczenie tego, jak mogą być rozstawione statki, ułatwia heurystykom analizę planszy przeciwnika. Gdy tego ograniczenia nie ma, gra staje się trochę bardziej losowa - chociaż nadal algorytmy oparte na heurystykach są znacznie skuteczniejsze od algorytmu losowego.
 
 \begin{table}[!h]
     \centering
@@ -67,7 +67,6 @@ Algorytm losowy, zgodnie z przewidywaniami wypadł najgorzej w zestawieniu z inn
 \subsubsection{Algorytm losowy z pominięciem pól sąsiadujących z zatopionymi statkami}
 
 Algorytm losowy z pominięciem pól był testowany jedynie w przypadku gdy statki nie mogą się ze sobą stykać. W przeciwnym wypadku, gdyby oponent ustawił statki obok siebie, badany algorytm nie byłby w stanie odnieść zwycięstwa. W wynikach testów widocznych w tabeli 6.2 widać, że algorytm rozszerzony jest dużo skuteczniejszy od swojej podstawowej wersji. Można też zauważyć zdecydowany wzrost skuteczności przeciwko algorytmowi opartemu na heurystyce najbardziej prawdopodobnej lokalizacji na podstawie trafień. W pozostałych przypadkach również można zaobserwować wzrost skuteczności, ale jest on bardzo niewielki.
-Test
 
 \begin{table}[!h]
     \centering
@@ -77,9 +76,9 @@ Test
 
 \subsubsection{Algorytm oparty na heurystyce najbardziej prawdopodobnej lokalizacji na podstawie trafień}
 
-Jak widać w tabeli 6.3, w przypadku tego algorytmu widać wyraźnie jego przewagę nad algorytmami losowymi. Jest on jednak zdecydowanie najsłabszym z algorytmów heurystyczych. Umiejętność 'dobijania' trafionych statków wyróżnia go na tle algorytmów losowych, ale nadal jednak w dużej mierze opiera się na losowości - jeśli na planszy przeciwnika nie ma żadnego trafienia, algorytm oddaje strzały w losowe komórki.
+Z tabeli 6.3 wynika, że w przypadku tego algorytmu widoczna jest wyraźnie jego przewaga nad algorytmami losowymi. Jest on jednak zdecydowanie najsłabszym z algorytmów heurystyczych. Umiejętność 'dobijania' trafionych statków wyróżnia go na tle algorytmów losowych, ale nadal w dużej mierze opiera się na losowości - jeśli na planszy przeciwnika nie ma żadnego trafienia, algorytm oddaje strzały w losowe komórki.
 
-Podobnie jak w 6.2.1, widać znaczące różnicę w zależności od wyboru zasad - skuteczność tego algorytmu wzrasta gdy statki mogą się ze sobą stykać.
+Podobnie jak w 6.2.1, widać znaczącą różnicę w zależności od wyboru zasad - skuteczność tego algorytmu wzrasta gdy statki mogą się ze sobą stykać.
 
 \begin{table}[!h]
     \centering
@@ -89,7 +88,7 @@ Podobnie jak w 6.2.1, widać znaczące różnicę w zależności od wyboru zasad
 
 \subsubsection{Algorytm oparty na heurystyce maksymalizacji zysku ze strzału}
 
-Widać tu wzrost skuteczności o około 10\% względem względem algorytmów losowych. Algorytm jest też zdecydowanie skuteczniejszy od algorytmu opartego na heurystyce najbardziej prawdopodobnej lokalizacji na podstawie trafień, aczkolwiek gdy statki mogą się ze sobą stykać to ich skuteczność jest porównywalna.
+W przypadku tego algorytmu widać wzrost skuteczności o około 10\% względem algorytmów losowych. Algorytm ten jest też zdecydowanie skuteczniejszy od algorytmu opartego na heurystyce najbardziej prawdopodobnej lokalizacji na podstawie trafień, aczkolwiek gdy statki mogą się ze sobą stykać, to ich skuteczność jest porównywalna.
 
 \begin{table}[!h]
     \centering
@@ -100,7 +99,7 @@ Widać tu wzrost skuteczności o około 10\% względem względem algorytmów los
 
 \subsubsection{Algorytm oparty na heurystyce maksymalizacji zysku priorytetyzującej dłuższe statki}
 
-Wyniki są widoczne w tabeli 6.5 i są bardzo zbliżone do wartości z punktu 6.2.4. Można zaobserwować, że w bezpośrednim starciu, badany algorytm jest nieznacznie skuteczniejszy od swojego podstawowego wariantu. Jednak we wszystkich pozostałych przypadkach poza jednym widoczny jest nieznaczny spadek skuteczności, w najgorszym przypadku 3,5\%.
+Wyniki zaprezentowane w tabeli 6.5 są bardzo zbliżone do wartości z punktu 6.2.4. Można zaobserwować, że w bezpośrednim starciu, badany algorytm jest nieznacznie skuteczniejszy od swojego podstawowego wariantu. Jednak we wszystkich pozostałych przypadkach, poza jednym, widoczny jest nieznaczny spadek skuteczności, w najgorszym przypadku 3,5\%.
 
 \begin{table}[!h]
     \centering
@@ -110,7 +109,7 @@ Wyniki są widoczne w tabeli 6.5 i są bardzo zbliżone do wartości z punktu 6.
 
 \subsubsection{Algorytm oparty na heurystykach maksymalizacji zysku oraz najbardziej prawdopodobnej lokalizacji na podstawie trafień}
 
-Jak widać na tabeli 6.6, algorytm wygrywa w zestawieniu ze wszystkimi pozostałymi algorytmami, poza swoją rozszerzoną wersją. Największy wzrost skuteczności widać przeciwko algorytmom \emph{Analiza trafień} oraz \emph{Max.zysk}. Wynika to z faktu, że badany algorytm jest usprawnieniem \emph{Max.zysk} poprzez umożliwienie algorytmowi 'dobijania' trafionych statków.
+Jak wynika z danych w tabeli 6.6, algorytm wygrywa w zestawieniu ze wszystkimi pozostałymi algorytmami, poza swoją rozszerzoną wersją. Największy wzrost skuteczności widać przeciwko algorytmom \emph{Analiza trafień} oraz \emph{Max.zysk}. Wynika to z faktu, że badany algorytm jest usprawnieniem \emph{Max.zysk} poprzez umożliwienie algorytmowi 'dobijania' trafionych statków.
 
 \begin{table}[!h]
     \centering
@@ -120,7 +119,7 @@ Jak widać na tabeli 6.6, algorytm wygrywa w zestawieniu ze wszystkimi pozostał
 
 \subsubsection{Algorytm oparty na heurystykach maksymalizacji zysku oraz najbardziej prawdopodobnej lokalizacji na podstawie trafień priorytetyzującej dłuższe statki}
 
-Podobnie jak w przypadku 6.2.5, wyniki wersji podstawowej i rozszerzonej algorytmu są bardzo zbliżone. W bezpośrednich starciu wersja rozszerzona jest nieznacznie skuteczniejsza gdy statki nie mogą się ze sobą stykać. W przeciwnym wypadku, lepiej wypada wersja podstawowa algorytmu. W starciach z pozostałymi algorytmami wyniki są zbliżone.
+Podobnie jak w przypadku 6.2.5, wyniki wersji podstawowej i rozszerzonej algorytmu są bardzo zbliżone. W bezpośrednim starciu wersja rozszerzona jest nieznacznie skuteczniejsza, gdy statki nie mogą się ze sobą stykać. W przeciwnym wypadku, lepiej wypada wersja podstawowa algorytmu. W starciach z pozostałymi algorytmami wyniki są zbliżone.
 
 \begin{table}[!h]
     \centering
@@ -130,9 +129,9 @@ Podobnie jak w przypadku 6.2.5, wyniki wersji podstawowej i rozszerzonej algoryt
 
 \subsection{Podsumowanie}
 
-Aby wyłonić najskuteczniejszy algorytm, stworzone zostały tabele 6.8 oraz 6.9. Przedstawiają one zestawienie pojedynków pomiędzy wszystkimi algorytmami. Tabela 6.8 przedstawia wyniki, gdy statki nie mogą się ze sobą stykać, a tabela 6.9. przeciwny przypadek. W każdej kolumnie na zielono zaznaczone zostały komórki zawierające najwyższą skuteczność. Oznacza to, że algorytm przypisany do danego wiersza, był najskuteczniejszy w starciu z algorytmem przypisanym do danej kolumny.
+Aby wyłonić najskuteczniejszy algorytm, utworzono tabele 6.8 oraz 6.9. Przedstawiają one zestawienie pojedynków pomiędzy wszystkimi algorytmami. Tabela 6.8 przedstawia wyniki, gdy statki nie mogą się ze sobą stykać, a tabela 6.9. przeciwny przypadek. W każdej kolumnie na zielono zaznaczone zostały komórki zawierające najwyższą skuteczność. Oznacza to, że algorytm przypisany do danego wiersza, był najskuteczniejszy w starciu z algorytmem przypisanym do danej kolumny.
 
-Korzystając z tych tabelę, można zaobserwować:
+Analizując dane tabel 6.8 i 6.9, można zaobserwować, że:
 
 \begin{itemize}
     \item Gdy statki nie mogą się ze sobą stykać, podstawowa wersja  \emph{Max. zysk + analiza trafień} jest najskuteczniejsza w prawie wszystkich przypadkach. 
@@ -141,7 +140,7 @@ Korzystając z tych tabelę, można zaobserwować:
 
 Widać więc wyraźnie wpływ różnicy zasad na wyniki. Ciekawe jest to, że w obu przypadkach ogólnie najskuteczniejszy algorytm przegrywał w starciu ze swoim drugim wariantem.
 
-Aby ostatecznie rozstrzygnąć, który algorytm jest skuteczniejszy spróbowano również policzyć ich ogólną skuteczność. Dokonano tego poprzez obliczenie średniej ze skuteczności przeciwko poszczególnym algorytmom. Przekłada się to na następujące wyniki procentowe:
+Aby ostatecznie rozstrzygnąć, który algorytm jest bardziej skuteczny spróbowano również policzyć ich ogólną skuteczność. Dokonano tego poprzez obliczenie średniej ze skuteczności przeciwko poszczególnym algorytmom. Przekłada się to na następujące wyniki procentowe:
 
 \begin{itemize}
     \item 70,94\% dla wersji podstawowej
@@ -198,7 +197,7 @@ Na podstawie wyników stworzono wykres widoczny na rysunku 6.1. Algorytmy zosta�
     \caption{Wykres zagregowanych średnich dla poszczególnych algorytmów.}
 \end{figure}
 
-Utworzono również wykres 6.2 ukazujący skuteczności różnych algorytmów w starciach z algorytmem losowym, aby lepiej zobrazować różnice w skuteczności zależnie od tego czy statki mogą się ze sobą stykać.
+Utworzono również wykres 6.2 obrazujący skuteczności różnych algorytmów w starciach z algorytmem losowym, aby lepiej zobrazować różnice w skuteczności, zależnie od tego czy statki mogą się ze sobą stykać, czy nie.
 
 \begin{figure}[!h]
     \label{fig:round-avg}
@@ -217,11 +216,11 @@ Dla wszystkich zestawień algorytmów obliczono również średnią liczbę zagr
 
 \subsection{Analiza rozgrywek z ludźmi}
 
-Niestety nie udało się zebrać wystarczająco dużo danych, aby przeprowadzić dokładną analizę skuteczności algorytmów decyzyjnych przeciwko ludziom. Testy algorytm-algorytm opierały się na 1000 rozgrywek pomiędzy parami algorytmów, dla obu wariantów zasad. W przypadku testów z ludźmi, do analizy potrzebny byłoby 13 000 rozgrywek, ponieważ zaimplementowano 7 algorytmów, w tym jeden który dostępny jest jedynie gdy statki nie mogą się ze sobą stykać. Udało się zebrać dane dotyczące jedynie około 100 rozgrywek, a więc jedynie 1\% potrzebnej liczby. Przeprowadzona na ich podstawie analiza nie jest więc zbyt miarodajna, może być potraktowana raczej jako ciekawostka.
+Niestety nie udało się zebrać wystarczająco dużo danych, aby przeprowadzić dokładną analizę skuteczności algorytmów decyzyjnych przeciwko ludziom. Testy algorytm-algorytm opierały się na 1000 rozgrywek pomiędzy parami algorytmów, dla obu wariantów zasad. W przypadku testów z ludźmi, do analizy potrzebnych byłoby 13 000 rozgrywek, ponieważ zaimplementowano 7 algorytmów, w tym jeden który dostępny jest jedynie gdy statki nie mogą się ze sobą stykać. Udało się zebrać dane dotyczące jedynie około 100 rozgrywek, a więc jedynie 1\% potrzebnej liczby. Przeprowadzona na ich podstawie analiza nie jest więc zbyt miarodajna, może być potraktowana raczej jako ciekawostka.
 
 Większość użytkowników preferowała wybór zasad niepozwalających statkom się stykać - dlatego tylko ten przypadek będzie analizowany.
 
-Na tabeli 6.11 oraz obrazującym ją wykresie z rysunku 6.12 widać, że ogólna tendencja skuteczności algorytmów jest podobna. Widać jej stopniowy wzrost, oraz spadek średniej liczby tur potrzebnej do pokonania gracza. Anomalią jest znaczny wzrost skuteczności w przypadku algorytmu \emph{Max. zysk}, ale wynika to najprawdopodobniej z małej próby badawczej. Dodatkowym czynnikiem utrudniającym miarodajną analizę wyników starć algorytm-gracz, jest fakt że nie każdy gracz gra na takim samym poziomie. Teoretycznie słabszy algorytm może mieć zawyżoną skuteczność, jeśli grało z nim  więcej 'słabszych' graczy. Dlatego konieczna jest większa ilość rozgrywek, aby wyeliminować wpływ tych czynników na ogół danych.
+W tabeli 6.11 oraz obrazującym ją wykresie z rysunku 6.12 widać, że ogólna tendencja skuteczności algorytmów jest podobna. Widać jej stopniowy wzrost, oraz spadek średniej liczby tur potrzebnych do pokonania gracza. Anomalią jest znaczny wzrost skuteczności w przypadku algorytmu \emph{Max. zysk}, ale wynika to najprawdopodobniej z małej próby badawczej. Dodatkowym czynnikiem utrudniającym miarodajną analizę wyników starć algorytm-gracz jest fakt, że nie każdy gracz gra na takim samym poziomie. Teoretycznie słabszy algorytm może mieć zawyżoną skuteczność, jeśli grało z nim  więcej 'słabszych' graczy. Dlatego konieczna jest większa ilość rozgrywek, aby wyeliminować wpływ tych czynników na ogół danych.
 
 \begin{table}[!h]
     \label{fig:vs-people}

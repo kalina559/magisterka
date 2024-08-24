@@ -1,28 +1,32 @@
 
 
 \newpage % Rozdziały zaczynamy od nowej strony.
-\section{Implementacja gry ‘Statki’}
+\section{Implementacja gry Statki}
 
-W poniższym rozdziale opisana została architektura aplikacji, oraz opisane zostały kluczowe zaimplementowane klasy. Pozostałe ważne fragmenty kodu są dostępne w załączniku 1.
+W poniższym rozdziale opisana została architektura aplikacji oraz opisane zostały kluczowe zaimplementowane klasy. Pozostałe ważne fragmenty kodu są dostępne w załączniku 1.
 
 \subsection{Wybór technologii}
 
 \subsubsection{Frontend}
-\indent Do implementacji warstwy frontend wybrano framework Vue.js. Jest to jeden z wielu dostępnych frameworków JavaScript \cite{vuejs}. Został wybrany ze względu na swoją prostotę, dobrą dokumentację oraz fakt, że jest się go stosunkowo łatwo nauczyć w porównaniu do innych frameworków, na przykład React.js czy AngularJS \cite{whyChooseVue}.
-Dodatkowym plusem jest też aplikacje napisane przy pomocy Vue.js bardzo łatwo jest hostować za darmo na Github Pages. Frontend napisany na potrzeby tej pracy dostępny jest pod adresem \url{https://kalina559.github.io/battleships-game/}.
 
-\indent Repozytorium z projektem dostępne jest w serwisie GitHub, pod adresem \url{https://github.com/kalina559/battleships-game}
+ Do implementacji warstwy frontend wybrano framework Vue.js. Jest to jeden z wielu dostępnych frameworków JavaScript \cite{vuejs}. Został wybrany ze względu na swoją prostotę, dobrą dokumentację oraz fakt, że jest się go stosunkowo łatwo nauczyć w porównaniu do innych frameworków, na przykład React.js czy AngularJS \cite{whyChooseVue}.
+Dodatkowym plusem jest też fakt, że aplikacje napisane przy pomocy Vue.js bardzo łatwo jest hostować za darmo na Github Pages. Frontend napisany na potrzeby tej pracy dostępny jest pod adresem \url{https://kalina559.github.io/battleships-game/}.
+
+Repozytorium z projektem dostępne jest w serwisie GitHub, pod adresem \url{https://github.com/kalina559/battleships-game}
 \subsubsection{Backend}
-\indent Warstwa backend jest potrzebna do wykonywania bardziej skomplikowanych obliczeń, takich jak kalkulowanie kolejnych ruchów z wykorzystaniem algorytmów decyzyjnych. Stan danej rozgrywki również jest przechowywany po stronie serwera - czyli naszego backendu. Teoretycznie możliwe byłoby pominięcie warstwy backend, ponieważ algorytmy wykorzystane w tej pracy nie są aż tak ciężkie obliczeniowo, ale nie jest to najlepszą praktyką. Przechowywanie stanu gry po stronie klienta również wiązałoby się z ryzykiem manipulacji przez gracza, na przykład poprzez konsolę dewelopera w przeglądarce.
 
-\indent Do implementacji wykorzystano technologię .NET w wersji 8.0. .NET to platforma programistyczna stworzona przez firmę Microsoft. Głównym językiem używanym w .NET jest C\#, ale Microsoft wspiera również F\# oraz Visual Basic \cite{whatisdotnet} \cite{dotnetlanguages}. Wybrany w poniższej pracy język programowania to C\#. Aplikacja stanowi RESTful (Representational state transfer) API, z którego może korzystać frontend, aby pobierać lub aktualizować aktualny stan rozgrywki. Backend jest hostowany za pomocą Azure App Service i jest dostępny pod adresem \url{https://battleshipswebapi.azurewebsites.net/api/}
+Warstwa backend jest potrzebna do wykonywania bardziej skomplikowanych obliczeń, takich jak kalkulowanie kolejnych ruchów z wykorzystaniem algorytmów decyzyjnych. Stan danej rozgrywki jest również przechowywany po stronie serwera - czyli naszego backendu. Teoretycznie możliwe byłoby pominięcie warstwy backend, ponieważ algorytmy wykorzystane w tej pracy nie są aż tak ciężkie obliczeniowo, ale nie jest to najlepszą praktyką. Przechowywanie stanu gry po stronie klienta również wiązałoby się z ryzykiem manipulacji przez gracza, na przykład poprzez konsolę dewelopera w przeglądarce.
 
-\indent Repozytorium z projektem dostępne jest w serwisie GitHub, pod adresem \url{https://github.com/kalina559/battleships-backend}
+Do implementacji wykorzystano technologię .NET w wersji 8.0. .NET to platforma programistyczna stworzona przez firmę Microsoft. Głównym językiem używanym w .NET jest C\#, ale Microsoft wspiera również F\# oraz Visual Basic \cite{whatisdotnet} \cite{dotnetlanguages}. Wybrany w poniższej pracy język programowania to C\#. Aplikacja stanowi RESTful (Representational state transfer) API, z którego może korzystać frontend, aby pobierać lub aktualizować aktualny stan rozgrywki. Backend jest hostowany za pomocą Azure App Service i jest dostępny pod adresem \url{https://battleshipswebapi.azurewebsites.net/api/}
+
+Repozytorium z projektem dostępne jest w serwisie GitHub, pod adresem \url{https://github.com/kalina559/battleships-backend}
 \subsubsection{Baza danych}
-\indent Założenia pracy wymagały zapewnienia możliwości zapisu przebiegu zakończonych rozgrywek, aby móc je później przeanalizować. W tym celu wykorzystano Azure Cosmos DB for NoSQL. Składa się ona z dwóch kontenerów - 'GameSessions' oraz 'TestGameSessions'. Dokonano takiego podziału aby odseparować dane generowane przez rozgrywki człowiek-algorytm oraz algorytm-algorytm. Rekordy zawierają dokumenty JSON, więc zdecydowano, że nie ma potrzeby stosowania relacyjnej bazy danych.
+
+Założenia pracy wymagały zapewnienia możliwości zapisu przebiegu zakończonych rozgrywek, aby móc je później przeanalizować. W tym celu wykorzystano Azure Cosmos DB for NoSQL. Składa się ona z dwóch kontenerów - 'GameSessions' oraz 'TestGameSessions'. Dokonano takiego podziału aby odseparować dane generowane przez rozgrywki człowiek-algorytm oraz algorytm-algorytm. Rekordy zawierają dokumenty JSON, więc zdecydowano, że nie ma potrzeby stosowania relacyjnej bazy danych.
 
 \subsection{Architektura aplikacji}
-\indent Jak widać na rysunku 4.1, komunikacja pomiędzy backendem i frontendem działa w obie strony - backend jest odpytywany przez frontend o obecny stan gry, a następnie może aktualizować ten stan na podstawie ruchów gracza. Po zakończonej rozgrywce backend zapisuje stan gry w bazie danych, ale potem nie ma już do niego dostępu. Aby sprawdzić przebieg poprzednich rozgrywek, należy połączyć się bezpośrednio do bazy danych.
+
+Jak widać na rysunku 4.1, komunikacja pomiędzy backendem i frontendem działa w obie strony - backend jest odpytywany przez frontend o obecny stan gry, a następnie może aktualizować ten stan na podstawie ruchów gracza. Po zakończonej rozgrywce aplikacja backend zapisuje stan gry w bazie danych, ale potem nie ma już do niego dostępu. Aby sprawdzić przebieg poprzednich rozgrywek, należy połączyć się bezpośrednio do bazy danych.
 
 \begin{figure}[!h]
     \label{fig:architektura}
@@ -31,7 +35,7 @@ Dodatkowym plusem jest też aplikacje napisane przy pomocy Vue.js bardzo łatwo 
 \end{figure}
 
 \subsection{Implementacja frontendu}
-\indent Aplikacja frontend składa się z jednej strony, której zawartość zmienia się w zależności od wyborów gracza. Przed rozpoczęciem rozgrywki, gracz może wybrać zasady - czy statki mogą się ze sobą stykać. Dropdown z wyborem algorytmu przeciwnika jest dostępny jedynie w lokalnie zbudowanej wersji aplikacji. Wersja produkcyjna, dostępna dla graczy nie daje takiego wyboru. Dzięki temu gracze nie wiedzą z jakim algorytmem grają podczas rozstawiania swoich statków, nie wiedzą więc jakie rozstawienie najbardziej by im się opłaciło.
+\indent Aplikacja frontend składa się z jednej strony, której zawartość zmienia się w zależności od wyborów gracza. Przed rozpoczęciem rozgrywki, gracz może wybrać zasady - czy statki mogą się ze sobą stykać czy też nie. Dropdown z wyborem algorytmu przeciwnika jest dostępny jedynie w lokalnie zbudowanej wersji aplikacji. Wersja produkcyjna, dostępna dla graczy, nie daje takiego wyboru. Dzięki temu gracze nie wiedzą z jakim algorytmem grają podczas rozstawiania swoich statków, nie wiedzą więc jakie rozstawienie byłoby dla nich najbardziej korzystne.
 
 Dostępne są dwie wersje językowe aplikacji - polska oraz angielska.
 
@@ -41,9 +45,9 @@ Dostępne są dwie wersje językowe aplikacji - polska oraz angielska.
     \caption{Aplikacja frontend przed rozpoczęciem rozgrywki}
 \end{figure}
 
-Po kliknięciu 'Rozpocznij grę', gracz widzi przed sobą dwie plansze, tak jak przedstawia to rysunek 4.2. Na górze znajduje się plansza przeciwnika, z niewidocznymi statkami, na dole zaś znajduje się plansza gracza, na której musi rozmieścić swoje statki. W tym celu użytkownik może skorzystać z przycisków znajdujących się pod swoją planszą. Rozwiązanie to zapewnia możliwość gry również na urządzeniach mobilnych, gdzie korzystanie ze strzałek na klawiaturze byłoby problematyczne.
+Po kliknięciu przycisku "Rozpocznij grę", gracz widzi przed sobą dwie plansze, tak jak przedstawia to rysunek 4.2. Na górze znajduje się plansza przeciwnika, z niewidocznymi statkami, na dole zaś znajduje się plansza gracza, na której musi rozmieścić swoje statki. W tym celu użytkownik może skorzystać z przycisków znajdujących się pod swoją planszą. Rozwiązanie to zapewnia możliwość gry również na urządzeniach mobilnych, gdzie korzystanie ze strzałek na klawiaturze byłoby problematyczne.
 
-\indent Na górze strony znajduje się element przedstawiający obecny stan gry - na rysunku 4.2 widnieje na nim 'Czekanie na rozmieszczenie statków przez użytkownika'. Ma to na celu zapewnienie graczowi informacji, co ma teraz robić.
+\indent Na górze strony znajduje się element przedstawiający obecny stan gry - na rysunku 4.2 widnieje napis: "Czekanie na rozmieszczenie statków przez użytkownika". Ma to na celu zapewnienie graczowi informacji, co ma robić w danym momencie.
 
 \begin{figure}[!h]
     \label{fig:frontend-game}
@@ -51,7 +55,7 @@ Po kliknięciu 'Rozpocznij grę', gracz widzi przed sobą dwie plansze, tak jak 
     \caption{Aplikacja frontend na starcie rozgrywki}
 \end{figure}
 
-Po rozstawieniu statków rozpoczyna się właściwa rozgrywka. Gracz i przeciwnik na zmianę oddają strzały, a nad ich planszami widać informację zwrotną o ostatnim strzale. Aby oddać strzał, gracz musi jedynie kliknąć daną komórkę na planszy przeciwnika. Gra kończy się gdy wszystkie statki jednej ze stron zostaną zatopione. 
+Po rozstawieniu statków rozpoczyna się właściwa rozgrywka. Gracz i przeciwnik na zmianę oddają strzały, a nad ich planszami znajduje się informacja zwrotną o ostatnim strzale. Aby oddać strzał, gracz musi jedynie kliknąć w daną komórkę na planszy przeciwnika. Gra kończy się gdy wszystkie statki jednej ze stron zostaną zatopione. 
 
 \begin{figure}[!h]
     \label{fig:frontend--in-game}
@@ -68,11 +72,11 @@ Aplikacja frontend składa się jedynie z kilku komponentów:
     \item \textbf{UserGrid.vue}: Plansza gracza, widoczna na rysunkach 4.2 i 4.3.
 \end{itemize}
 
-Plansze gracza i przeciwnika są oddzielnymi elementami, ponieważ różnią się zaimplementowaną logiką. Plansza przeciwnika przedstawia jedynie informacje płynące z backendu o tym które pole zostało trafione i w które już strzelaliśmy. Plansza gracza zaś zapewnia możliwość rozstawienia statków. Z powyższych elementów korzysta główny komponent aplikacji, plik App.vue.
+Plansze gracza i przeciwnika są oddzielnymi elementami, ponieważ różnią się zaimplementowaną logiką. Plansza przeciwnika przedstawia jedynie informacje płynące z backendu o tym, które pole zostało trafione i w które już strzelaliśmy. Plansza gracza zaś zapewnia możliwość rozstawienia statków. Z powyższych elementów korzysta główny komponent aplikacji, plik \emph{App.vue}.
 
-Kluczowy jest też plik GameApi.js, w którym zdefiniowany jest klient API oraz endpointy, które wołane są po stronie backendu.
+Kluczowy jest też plik \emph{GameApi.js}, w którym zdefiniowany jest klient API oraz endpointy, które wołane są po stronie backendu.
 
-Po otwarciu aplikacji na nowej przeglądarce zapisywany jest plik cookie 'sessionId', który następnie wysyłany jest z każdym zapytaniem do API. W ten sposób backend wie, który gracz woła API i na tej podstawie aktualizuje stan danej gry. Projekty Web API w technologii .NET zapewniają podobną funkcjonalność, ale niestety, aby z niej skorzystać użytkownik musi wyrazić zgodę na 'Pliki cookie innych firm' w przeglądarce. 
+Po otwarciu aplikacji w nowej przeglądarce zapisywany jest plik cookie 'sessionId', który następnie wysyłany jest z każdym zapytaniem do API. W ten sposób aplikacja backend wie, który gracz woła API i na tej podstawie aktualizuje stan danej gry. Projekty Web API w technologii .NET zapewniają podobną funkcjonalność, ale niestety, aby z niej skorzystać użytkownik musi wyrazić zgodę na "Pliki cookie innych firm" w przeglądarce. 
 
 \subsection{Implementacja backendu}
 \indent Aplikacja składa się z kilku projektów:
@@ -90,18 +94,19 @@ Endpointy, które zapewnia Battleships.WebApi.
     \item \textbf{POST /api/AiType/select}: Umożliwia graczowi wybór algorytmu decyzyjnego przeciwnika. Używany jedynie na lokalnym środowisku.
     \item \textbf{GET /api/GameState/get}: Zwraca obecny stan rozgrywki, a więc rozmieszczenie statków obu stron oraz dotychczasowe strzały.
     \item \textbf{GET /api/GameState/clear}: Umożliwia wyczyszczenie dotychczasowego stanu gry. Endpoint ten jest wołany po otwarciu gry, aby wyczyścić dotychczasową rozgrywkę - w ten sposób unikamy nieprzewidzianego zachowania aplikacji.
-    \item \textbf{POST /api/Rules/update}: Umożliwia wybór zasad - czy statki mogą się ze sobą stykać.
-    \item \textbf{POST /api/ShipLocations/user}: Umożliwia rozmieszczenie statków graczowi. Endpoint ten jest wołany gdy użytkownik rozstawi wszystkie 5 swoich statków.
+    \item \textbf{POST /api/Rules/update}: Umożliwia wybór zasad - czy statki mogą się ze sobą stykać, czy nie.
+    \item \textbf{POST /api/ShipLocations/user}: Umożliwia graczowi rozmieszczenie statków. Endpoint ten jest wołany gdy użytkownik rozstawi wszystkie 5 swoich statków.
     \item \textbf{GET /api/ShipLocations/opponent}: Zwraca rozmieszczenie statków przeciwnika.
-    \item \textbf{POST /api/Shot/user}: Umożliwia użytkownikowi oddanie strzału, wołany jest za każdym razem gdy użytkownik w swojej turze wybierze komórkę na planszy przeciwnika.
+    \item \textbf{POST /api/Shot/user}: Umożliwia użytkownikowi oddanie strzału, wołany jest za każdym razem, gdy użytkownik w swojej turze wybierze komórkę na planszy przeciwnika.
     \item \textbf{GET /api/Shot/opponent}: Zwraca komórkę, którą algorytm decyzyjny przeciwnika wybrał do ostrzału.
 \end{itemize}
 
 Dokumentacja API dostępna jest pod adresem \url{https://battleshipswebapi.azurewebsites.net/swagger/index.html}.
 \newline \newline
-Najważniejszą klasą jest GameState, widoczna na listingu 1. Wykorzystywana ona jest za każdym razem, gdy algorytm decyzyjny kalkuluje najbardziej korzystny z punktu widzenia danej heurystyki ruch. Dalej opisane zostaną klasy wykorzystane w GameState. Klasa Ship, widoczna na listingu 2, opisuje rozmiar, położenie oraz status statku. Klasa shot, widoczna na listingu 3, opisuje dany strzał - w jakie pole został oddany, oraz czy trafiony został jakiś statek. Enum AiType określa rodzaj heurystyki.
+Najważniejszą klasą jest \emph{GameState}, widoczna na listingu 1. Wykorzystywana jest za każdym razem, gdy algorytm decyzyjny kalkuluje najbardziej korzystny ruch z punktu widzenia danej heurystyki. Dalej opisane zostaną klasy wykorzystane w \emph{GameState}. Klasa \emph{Ship}, widoczna na listingu 2, opisuje rozmiar, położenie oraz status statku. Klasa \emph{Shot}, widoczna na listingu 3, opisuje dany strzał - w jakie pole został oddany oraz czy trafiony został jakiś statek. Enum \emph{AiType} określa rodzaj heurystyki.
 
-PlayerAiType jest domyślnie puste, ponieważ w trakcie rozgrywki gracz-przeciwnik, to gracz podejmuje decyzje odnośnie strzałów. Pole to jest wykorzystywane jedynie w testach jednostkowych, gdzie jako gracz występuje algorytm decyzyjny.
+Pole \emph{PlayerAiType} jest wykorzystywane jedynie w testach jednostkowych, gdzie jako gracz występuje algorytm decyzyjny. Domyślnie jest puste, ponieważ w trakcie rozgrywki gracz-przeciwnik, to gracz podejmuje decyzje odnośnie strzałów.
+
 \begin{addmargin}[10mm]{0mm}
 \begin{lstlisting}[
     language={[Sharp]C},
@@ -208,7 +213,7 @@ namespace Battleships.AI.Strategies
 \end{lstlisting}
 \end{addmargin}
 
-Algorytmy korzystające z heurystyk, dodatkowo dziedziczą po abstrakcyjnej klasie HeuristicStrategyBase, przedstawionej na listingu 6. Każdy taki algorytm musi implementować metodę GenerateProbabilityMap. Generowana przez tę metodę mapa prawdopodobieństwa określa jak duża jest szansa (według danej heurystyki) że na danej komórce znajduje się statek. Mapa jest listą par liczb (A,B), gdzie A określa współrzędne komórki, a B prawdopodobieństwo wystąpienia statku. W tym kontekście słowo 'prawdopodobieństwo' jest używane potocznie, a liczba B nie jest równa dokładnemu prawdopodobieństwu. Każda z heurystyk ma różne wagi, i oblicza liczbę B na inny sposób, korzystając z umownych wartości.
+Algorytmy korzystające z heurystyk, dodatkowo dziedziczą po abstrakcyjnej klasie HeuristicStrategyBase, przedstawionej na listingu 6. Każdy taki algorytm musi implementować metodę GenerateProbabilityMap. Generowana przez tę metodę mapa prawdopodobieństwa określa jak duża jest szansa (według danej heurystyki), że na danej komórce znajduje się statek. Mapa jest listą par liczb (A,B), gdzie A określa współrzędne komórki, a B prawdopodobieństwo znajdowania się statku. W tym kontekście słowo 'prawdopodobieństwo' jest używane potocznie, a liczba B nie jest równa dokładnemu prawdopodobieństwu. Każda z heurystyk ma różne wagi i oblicza liczbę B w inny sposób, korzystając z umownych wartości.
 
 \indent Na podstawie wygenerowanej mapy prawdopodobieństwa, algorytm wybiera najbardziej korzystny ruch. 
 
@@ -271,22 +276,22 @@ public abstract class HeuristicStrategyBase
 \end{addmargin}
 
 \subsubsection{Algorytm losowy}
-Najprostszy algorytm, w trakcie implementacji był traktowany jako grupa kontrolna - jeśli dany algorytm miał niższą skuteczność od algorytmu losowego, to coś z nim było nie tak. Jedynym ograniczeniem przy wybieraniu komórki do ostrzału jest to, czy nie oddano już w nią strzału wcześniej.
+Najprostszy algorytm, w trakcie implementacji był traktowany jako grupa kontrolna - jeśli dany algorytm miał niższą skuteczność od algorytmu losowego, najprawdopodobniej wkradł się w niego jakiś błąd. Jedynym ograniczeniem przy wybieraniu komórki do ostrzału jest to, czy nie została już wcześniej ostrzelana.
 
 \subsubsection{Rozszerzony algorytm losowy}
 Dostępny jedynie gdy gracz wybierze opcję 'statki nie mogą się ze sobą stykać'. Różni się od zwykłego algorytmu losowego tym, że pomijane są pola, które sąsiadują z zatopionymi statkami.
 
 \subsubsection{Algorytm oparty na heurystyce maksymalizacji zysku ze strzału}
-Widoczny jest na listingu 7. Metoda AdjustProbabilityForShipLocations dla każdego niezatopionego statku przeciwnika iteruje przez całą planszę i sprawdza czy początek statku może rozpoczynać się na danej komórce. Jako początek statku traktujemy jego współrzędną o najmniejszych współrzędnych X i Y. Możliwe położenie statku jest analizowane zarówno w pionie jak i poziomie. Warunkami, które wykluczają możliwość rozpoczęcia się statku na danej komórce to:
+Widoczny jest na listingu 7. Metoda \emph{AdjustProbabilityForShipLocations} dla każdego niezatopionego statku przeciwnika iteruje przez całą planszę i sprawdza czy początek statku może rozpoczynać się na danej komórce. Jako początek statku traktujemy jego współrzędną o najmniejszych współrzędnych X i Y. Możliwe położenie statku jest analizowane zarówno w pionie jak i w poziomie. Warunkami, które wykluczają możliwość rozpoczęcia się statku na danej komórce to:
 \begin{itemize}
-    \item (Jeśli użytkownik zaznaczył opcję 'statki nie mogą się ze sobą stykać.) Jakakolwiek komórka sąsiadująca z możliwymi współrzędnymi statku została trafiona - czyli leży na niej inny statek przeciwnika.
+    \item (Jeśli użytkownik zaznaczył opcję 'statki nie mogą się ze sobą stykać'.) Jakakolwiek komórka sąsiadująca z możliwymi współrzędnymi statku została trafiona - czyli znajduje się na niej inny statek przeciwnika.
     \item Jakakolwiek komórka będąca możliwą współrzędną statku została już wcześniej ostrzelana.
     \item Jakakolwiek komórka będąca możliwą współrzędną statku została już wcześniej trafiona i jest częścią zatopionego statku.
 \end{itemize}
 Jeśli przykładowo statek o długości L może rozpoczynać się na komórce (X,Y) i leżeć w poziomie, to na mapie prawdopodobieństwa dodajemy liczbę 1 do komórek (X,Y), ..., (X+L, Y).
 
 
-Metody AdjustProbabilityForSunkShips oraz AdjustProbabilityForShotAtCells są wykorzystywana również w pozostałych algorytmach opartych na heurystykach - służą ona do wyzerowania wartości na mapie prawdopodobieństwa dla komórek, które zostały już ostrzelane lub sąsiadują z zatopionymi statkami (jeśli statki nie mogą się ze sobą stykać według zasad).
+Metody \emph{AdjustProbabilityForSunkShips} oraz \emph{AdjustProbabilityForShotAtCells} są wykorzystywane również w pozostałych algorytmach opartych na heurystykach - służą one do wyzerowania wartości na mapie prawdopodobieństwa dla komórek, które zostały już ostrzelane lub sąsiadują z zatopionymi statkami (jeśli statki nie mogą się ze sobą stykać według zasad).
 
 \begin{addmargin}[10mm]{0mm}
 \begin{lstlisting}[
@@ -397,7 +402,7 @@ Właściwie identyczny do algorytmu opisanego w rozdziale 4.5.3. Jedyną różni
     language={[Sharp]C},
     numbers=left,
     firstnumber=24,
-    caption={Zwiększanie wartości na mapie prawdopodobieństwa dla algorytm oparty na heurystyce maksymalizacji zysku priorytetyzującej dłuższe statki},
+    caption={Zwiększanie wartości na mapie prawdopodobieństwa dla algorytmu opartego na heurystyce maksymalizacji zysku priorytetyzującej dłuższe statki},
     aboveskip=0pt
 ]
 probabilityMap[(y * 10) + x + i] += dynamicWeight
@@ -417,7 +422,8 @@ Kombinacja algorytmów z punktów 4.5.3 i 4.5.4. Znacznie większą wagę ma tu 
     caption={Klasa LocationAndHitHeuristicStrategy},
     aboveskip=0pt
 ]
-    public class LocationAndHitHeuristicStrategy : HeuristicStrategyBase
+    public class LocationAndHitHeuristicStrategy
+        : HeuristicStrategyBase
     {
         private readonly static int
             POSSIBLE_SHIP_LOCATION_WEIGHT = 1,

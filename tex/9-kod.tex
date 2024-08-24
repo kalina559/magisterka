@@ -9,9 +9,9 @@ Obie aplikacje są dostępne w repozytoriach na GitHubie:
 
 Są również dostępne na płytce dołączonej do pracy, spakowane w formacie .
 
-\subsection{Frontend}
+\tocless\subsection{Frontend}
 
-\subsubsection{App.vue}
+\tocless\subsubsection{App.vue}
 
 W pliku App.vue, widocznym na listingu 14, znajduję się główna część aplikacji. Języki HTML oraz CSS wykorzystane są do zdefiniowania strony wizualnej, JavaScript zaś implementuje logikę. W poniższym 
 App.vue wykorzystuje pozostałe komponenty zdefiniowane w projekcie, między innymi Header.vue, UserGrid.vue czy OpponentGrid.vue. Dzięki temu ma dostęp do zdarzeń emitowanych przez te komponenty, takich jak na przykład ustawienie statku, czy wybór komórki na planszy przeciwnika.
@@ -365,7 +365,7 @@ export default {
 \end{lstlisting}
 \end{addmargin}
 
-\subsubsection{UserGrid.vue}
+\tocless\subsubsection{UserGrid.vue}
 Komponent UserGrid.vue jest drugim najbardziej złożonym elementem aplikacji frontend. Wynika to z faktu, że konieczne było zaimplementowanie w nim logiki związanej z rozstawianiem statków na planszy gracza. Znajdują się tutaj metody takie jak isOccupied, isAdjacentOccupied, które sprawdzają czy dana pozycja statku jest możliwa do zrealizowania. Użytkownik dostaje informację zwrotną poprzez zmianę koloru statku na kolor zielony lub czerwony. Kolor zielony oznacza, że statek może być postawiony na danej pozycji.
 
 Kontrolowanie zasad byłoby również możliwe poprzez backend, ale uznano że jest to bardzo nieoptymalne rozwiązanie - w trakcie rozstawiania statków gracz może sprawdzać dziesiątki różnych pozycji zanim podejmie swoją decyzję. Odpytywanie tyle razy backendu niepotrzebnie by obciążało aplikację.
@@ -741,7 +741,7 @@ export default {
 \end{addmargin}
 
 
-\subsubsection{GameApi}
+\tocless\subsubsection{GameApi}
 Plik GameApi.js zawiera definicje metod wykorzystywanych do odpytywania aplikacji backend poprzez zapytania AJAX. W tym celu wykorzystano klienta Axios. Do każdego zapytania dołączany jest header "X-Session-Id", który potrzebny jest do identyfikacji danej sesji gry.
 
 \begin{addmargin}[0mm]{0mm}
@@ -816,9 +816,9 @@ export default {
 \end{lstlisting}
 \end{addmargin}
 
-\subsection{Backend}
+\tocless\subsection{Backend}
 
-\subsubsection{Program.cs}
+\tocless\subsubsection{Program.cs}
 
 Najważniejszy element aplikacji backend. Służy do konfiguracji aplikacji, na przykład poprzez pozwolenie na CORS (Cross-Origin Resource Sharing) - dzięki temu frontend może wykonywać zapytania do backendu pomimo tego, że oba znajdują się w innych domenach. Program.cs umożliwia również rejestrowania serwisów, co jest konieczne aby później korzystać ze wstrzykiwania zależności (Dependency injection). 
 
@@ -918,7 +918,7 @@ app.Run();
 \end{lstlisting}
 \end{addmargin}
 
-\subsubsection{Przykładowy endpoint RESTful API}
+\tocless\subsubsection{Przykładowy endpoint RESTful API}
 
 \begin{addmargin}[0mm]{0mm}
 \begin{lstlisting}[
@@ -979,7 +979,7 @@ namespace Battleships.WebApi.Controllers
 \end{addmargin}
 
 
-\subsubsection{GameStateService}
+\tocless\subsubsection{GameStateService}
 
 GameStateService to klasa, która obsługuje kluczowe elementy rozgrywki. Za pomocą MemoryCache zapisuje i odczytuje instancje GameState, które trzymają informację o rozgrywce dla danego SessionId. Tutaj odbywa się też procesowanie strzałów, a więc sprawdzanie czy któryś ze statków gracza lub przeciwnika został trafiony. GameStateService kontroluje również czy rozgrywka nie została zakończona, ponieważ któraś ze stron zatopiła już wszystkie statki przeciwnika - jeśli tak, to przebieg gry zostaje zapisany jako dokument JSON w bazie danych Cosmos DB.
 
@@ -1175,7 +1175,7 @@ namespace Battleships.Core.Services
 \end{addmargin}
 
 
-\subsubsection{GridHelper}
+\tocless\subsubsection{GridHelper}
 
 GridHelper jest statyczną klasą pomocniczą, która zapewnia wiele metod używanych przez algorytmy do analizowania planszy przeciwnika. Umożliwia między innymi sprawdzanie czy dana komórka jest dostępna do ostrzału, czy jest częścią zatopionego statku, czy jest trafiona, etc.
 
@@ -1365,7 +1365,7 @@ namespace Battleships.Common.Helpers
 
 
 
-\subsubsection{HeuristicHelper}
+\tocless\subsubsection{HeuristicHelper}
 
 HeuristicHelper jest statyczna klasą pomocniczą, podobnie jak GridHelper z rodziału 1.2.4. Metody zawarte w tej klasie są jednak bardziej bezpośrednio związane z algorytmami decyzyjnymi. Metody te pozwalają na zwiększanie wartości komórek na mapie prawdopodobieństwa w zależności od tego ile wariacji statków może znajdować się na danej komórce, czy sąsiaduje z trafieniem bądź serią trafień, etc.
 
@@ -1629,26 +1629,5 @@ namespace Battleships.Common.Helpers
     }
 }
 
-\end{lstlisting}
-\end{addmargin}
-
-
-
-
-
-
-
-
-
-
-
-\begin{addmargin}[0mm]{0mm}
-\begin{lstlisting}[
-    language={[Sharp]C},
-    numbers=left,
-    firstnumber=0,
-    caption={Klasa ShotController.cs},
-    aboveskip=0pt
-]
 \end{lstlisting}
 \end{addmargin}

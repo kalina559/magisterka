@@ -7,11 +7,11 @@ Tematyka tej pracy została już poruszana w wielu pracach i artykułach naukowy
 \subsubsection{Efficient Algorithms for Battleship \cite{crombez2020efficient}}
 Praca ta analizuje algorytmiczny problem, pojawiający się w grze statki, a mianowicie jak zatopić trafiony statek w jak najmniejszej liczbie ruchów. W założeniach pracy występuje szereg uproszczeń:
 \begin{itemize}
-    \item Flota ostrzeliwana przez algorytm składa się z tylko jednego statku.
+    \item Flota ostrzeliwana przez algorytm składa się tylko z jednego statku.
     \item Jedna ze współrzędnych statku przeciwnika jest już znana.
     \item Statki nie mogą być obracane - zawsze znana jest orientacja statku.
 \end{itemize}
-Praca analizuje za to szerszy wachlarz kształtów statków. Rozważane są przypadki:
+Praca analizuje za to szerszy wachlarz kształtów statków. Rozważane są następujące przypadki:
 \begin{enumerate}
     \item Współrzędne ułożone w linii prostej.
     \item Współrzędne niezawierające równoległoboków.
@@ -20,15 +20,15 @@ Praca analizuje za to szerszy wachlarz kształtów statków. Rozważane są przy
 \end{enumerate}
 
 Przypadek nr 1 jest w przypadku tej pracy najbardziej trywialny, ale interesuje nas najbardziej z punktu widzenia niniejszej pracy magisterskiej. Pozostałe rodzaje kształtów wymagają zastosowania znacznie bardziej skomplikowanych algorytmów do znalezienia potencjalnych lokalizacji współrzędnych trafionego statku.
-Algorytm zaproponowany dla przypadku nr. 1 to: po udanym trafieniu w komórkę (X,Y), należy strzelać w kolejne pola (X+1,Y),(X+2,Y),... aż spudłujemy. Jeśli statek rozpoczyna się w narożniku planszy (0,0), niemożliwe jest spudłowanie. Jeśli statek rozpoczyna się w innym miejscu, możliwe jest jednokrotne spudłowanie, po czym należy zacząć ostrzeliwać komórki po drugiej stronie (X,Y), tj. (X-1,Y), (X-2,Y),... . Maksymalna liczba spudłowań według tego algorytmu to 1.
+Algorytm zaproponowany dla przypadku nr 1 to: po udanym trafieniu w komórkę (X,Y), należy strzelać w kolejne pola (X+1,Y),(X+2,Y),... aż spudłujemy. Jeśli statek rozpoczyna się w narożniku planszy (0,0), niemożliwe jest spudłowanie. Jeśli statek rozpoczyna się w innym miejscu, możliwe jest jednokrotne spudłowanie, po czym należy zacząć ostrzeliwać komórki po drugiej stronie (X,Y), tj. (X-1,Y), (X-2,Y),... . Maksymalna liczba spudłowań według tego algorytmu to 1.
 
 Podobna logika została zaimplementowana w algorytmie opartym na heurystyce najbardziej prawdopodobnej lokalizacji na
-podstawie trafień z rozdziału 4.5.4. Nasz przypadek jest jednak trochę bardziej skomplikowany, ponieważ nie jest znana orientacja statku, a floty składają się zawsze z 5 statków. Oto działanie naszego algorytmu w podobnej sytuacji - kiedy znamy jedną współrzędną statku (X,Y).
+podstawie trafień z rozdziału 4.5.4. Nasz przypadek jest jednak trochę bardziej skomplikowany, ponieważ nie jest znana orientacja statku, a floty składają się zawsze z 5 statków. Oto działanie naszego algorytmu w podobnej sytuacji - kiedy znamy jedną współrzędną statku (X,Y):
 
 \begin{itemize}
-\item Rozważymy uproszczony przypadek, tj. nie oddano jeszcze żadnych strzałów poza tym, który trafił w jedną ze współrzędnych statku. W takiej sytuacji komórki, które wskaże nasz algorytm to poziomi i pionowi sąsiedzi (X,Y). W najlepszym przypadku, czyli kiedy (X,Y) znajduje się w narożniku planszy, istnieją jedynie 2 takie komórki. Algorytm może spudłować jedynie raz, zanim trafi kolejną komórkę i tym samym zdobędzie informację o orientacji statku. Mając te informację, może zatopić statek, nie pudłując już ani razu.
+\item Rozważymy uproszczony przypadek, tj. nie oddano jeszcze żadnych strzałów poza tym, który trafił w jedną ze współrzędnych statku. W takiej sytuacji komórki, które wskaże nasz algorytm to sąsiedzi (X,Y) w pionie i w poziomie. W najlepszym przypadku, czyli kiedy (X,Y) znajduje się w narożniku planszy, istnieją jedynie 2 takie komórki. Algorytm może spudłować jedynie raz, zanim trafi kolejną komórkę i tym samym zdobędzie informację o orientacji statku. Mając tę informację, może zatopić statek, nie pudłując już ani razu.
 
-\item W bardziej pesymistycznym scenariuszu, gdy (X,Y)) znajduje się na środku planszy, algorytm będzie ostrzeliwał po kolei 4 sąsiadujące komórki, aż w którąś trafi. Możliwe jest więc że spudłuje 3 razy zanim zdobędzie informację o orientacji statku. Po ustaleniu orientacji, algorytm ostrzeliwuje sąsiadujące komórki leżące na przedłużeniu serii trafień. Jeśli w pierwszym kroku spudłowano 3 razy, to istnieje już jedynie 1 taka komórka, a więc nie możemy spudłować w kroku drugim. Zatem maksymalna liczba spudłowań to 3.
+\item W bardziej pesymistycznym scenariuszu, gdy (X,Y)) znajduje się na środku planszy, algorytm będzie ostrzeliwał po kolei 4 sąsiadujące komórki, aż w którąś trafi. Możliwe jest więc że spudłuje 3 razy zanim zdobędzie informację o orientacji statku. Po ustaleniu orientacji, algorytm ostrzeliwuje sąsiadujące komórki leżące na przedłużeniu serii trafień. Jeśli w pierwszym kroku spudłowano 3 razy, to istnieje już jedynie 1 taka komórka, a więc nie możemy spudłować w kroku drugim. Zatem maksymalna liczba chybień to 3.
 \end{itemize}
 
 Po rozważeniu obu przypadków, maksymalna liczba spudłowań dla naszego algorytmu to 3.
@@ -36,7 +36,7 @@ Po rozważeniu obu przypadków, maksymalna liczba spudłowań dla naszego algory
 
 \subsubsection{Developing a Heuristic via Diagrammatic Reasoning \cite{anderson1995developing}}
 
-Autorzy pracy opisują korzyści nadania komputerom umiejętnośći rozumowania za pomocą diagramów. Opisują między innymi metodę intra-diagramatycznego rozumowania (Intra-diagrammatic reasoning) i pokazują jej użyteczność do stworzenia prostej heurystyki do gry w statki. Opisywana metoda polega na aplikowaniu różnych operatorów do pojedynczego diagramu, między innymi:
+Autorzy pracy opisują korzyści nadania komputerom umiejętności rozumowania za pomocą diagramów. Opisują między innymi metodę intra-diagramatycznego rozumowania (Intra-diagrammatic reasoning) i wskazują jej użyteczność do stworzenia prostej heurystyki do gry w statki. Opisywana metoda polega na aplikowaniu różnych operatorów do pojedynczego diagramu, między innymi:
 \begin{itemize}
     \item Przypisanie
     \item Negacja
@@ -44,16 +44,16 @@ Autorzy pracy opisują korzyści nadania komputerom umiejętnośći rozumowania 
     \item Iloraz logiczny
 \end{itemize}
 
-Zasady gry Statki przyjęte w tej pracy różnią się trochę od tych wcześniej opisywanych w rozdziale 2.2 - autorzy założyli że statki mogą być ustawione również na skos, jednak sama metoda wnioskowania jest bardzo zbliżona do tych użytych w opisywanej pracy magisterskiej. Dodatkowym założeniem jest to, że flota składa się jedynie z jednego pięciomasztowca, a gracze co turę oddają 'salwę' siedmiu strzałów.
+Zasady gry Statki przyjęte w tej pracy różnią się trochę od tych wcześniej opisywanych w rozdziale 2.2 - autorzy założyli, że statki mogą być ustawione również na skos, jednak sama metoda wnioskowania jest bardzo zbliżona do tych użytych w pracy magisterskiej. Dodatkowo założono, że flota składa się jedynie z jednego pięciomasztowca, a gracze co turę oddają 'salwę' siedmiu strzałów.
 
-Prawdopodobieństwo wystąpienie na danej komórce statku jest determinowane w następujący sposób: tworzone są 4 diagramy o wymiarach 10 na 10, po jednym dla każdej możliwej orientacji statku. Na każdy z diagramów 'nakładane' są możliwe pozycje statków w danej orientacji. Każde takie 'nałożenie' statku na diagram powoduje zaciemnienie komórek, które są jego potencjalnym położeniem. Tak więc komórki na których może leżeć kilka różnych wariantów statku są ciemniejsze od pozostałych. Dla przykładu, jeśli rozważamy dwie możliwe lokalizacje statku:
+Prawdopodobieństwo wystąpienie na danej komórce statku jest determinowane w następujący sposób: tworzone są 4 diagramy o wymiarach 10 na 10, po jednym dla każdej możliwej orientacji statku. Na każdy z diagramów 'nakładane' są możliwe pozycje statków w danej orientacji. Każde takie 'nałożenie' statku na diagram powoduje zaciemnienie komórek, które są jego potencjalnym położeniem. Tak więc komórki na których może znajdować się kilka różnych wariantów statku są ciemniejsze od pozostałych. Dla przykładu, jeśli rozważamy dwie możliwe lokalizacje statku:
 \begin{itemize}
     \item Pomiędzy komórkami (0,0) i (4,0)
     \item Pomiędzy komórkami (1,0) i (5,0)
 \end{itemize}
-To na wynikowym diagramie komórki (0,0) oraz (5,0) będą jaśniejsze od pozostałych.
+to na wynikowym diagramie komórki (0,0) oraz (5,0) będą jaśniejsze od pozostałych.
 
-4 diagramy otrzymane w ten sposób nakładamy na siebie i otrzymujemy diagram A mapę prawdopodobieństwa wystąpienia statku. Na podstawie tej mapy wybrane zostają komórki, które zostaną ostrzelane w kolejnej turze. Jeśli jakieś komórki zostały już ostrzelane wcześniej, dodajemy je do diagramu B. Aby otrzymać ostateczną mapę prawdopodobieństwa, stosujemy operację
+4 diagramy otrzymane w ten sposób nakładamy na siebie i otrzymujemy diagram A - mapę prawdopodobieństwa wystąpienia statku. Na podstawie tej mapy wybrane zostają komórki, które zostaną ostrzelane w kolejnej turze. Jeśli jakieś komórki zostały już ostrzelane wcześniej, dodajemy je do diagramu B. Aby otrzymać ostateczną mapę prawdopodobieństwa, stosujemy operację
 \begin{align*}
     A \land \neg B
 \end{align*}

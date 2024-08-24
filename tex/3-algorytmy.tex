@@ -1,0 +1,66 @@
+\newpage % Rozdziały zaczynamy od nowej strony.
+\section{Algorytmy}
+\subsection{Wprowadzenie do algorytmów}
+
+Algorytmy stanowią podstawę działania każdego programu komputerowego. Są to zestawy kroków, które prowadzą do rozwiązania określonego problemu. Każdy algorytm można opisać za pomocą języka formalnego, który jest zrozumiały dla komputera. W kontekście informatyki, algorytmy nie tylko rozwiązują problemy, ale także optymalizują procesy obliczeniowe, minimalizując czas i zasoby potrzebne do uzyskania wyniku\cite{algorithms}.
+
+\subsection{Klasyfikacja algorytmów}
+
+Algorytmy można klasyfikować według różnych kryteriów, w zależności od ich struktury, sposobu działania, oraz rodzaju problemów, które rozwiązują. Oto kilka głównych kategorii:
+
+\begin{itemize}
+    \item{\textbf{Algorytmy deterministyczne i niedeterministyczne}}
+    
+    Algorytmy deterministyczne zawsze prowadzą do tego samego wyniku, jeśli zostaną uruchomione z tymi samymi danymi wejściowymi. Przykładem jest algorytm sortowania bąbelkowego (bubble sort) [2]. Z kolei algorytmy niedeterministyczne mogą dawać różne wyniki przy tych samych danych wejściowych, jak np. algorytmy genetyczne \cite{cohen1979non}.
+    
+    \item{\textbf{Algorytmy dokładne i przybliżone}}
+    
+    Algorytmy dokładne znajdują optymalne rozwiązanie problemu, jednak często wymagają dużych zasobów obliczeniowych. Przykładem jest algorytm znajdowania najkrótszej ścieżki w grafie (algorytm Dijkstry). Algorytmy przybliżone, jak heurystyki, oferują rozwiązanie, które może nie być optymalne, ale jest uzyskane znacznie szybciej \cite{trevisan}.
+    
+    \item{\textbf{Algorytmy iteracyjne i rekurencyjne}}
+
+    Algorytmy iteracyjne rozwiązują problem poprzez powtarzanie określonych operacji, aż do osiągnięcia pożądanego rezultatu. Algorytmy rekurencyjne natomiast rozwiązują problem, wywołując samą siebie na mniejszych podproblemach. Przykładem algorytmu rekurencyjnego jest algorytm wyszukiwania binarnego \cite{recursiveVsIterative}.
+    
+\end{itemize}
+
+\subsection{Przykłady popularnych algorytmów}
+\begin{itemize}
+    \item{\textbf{Algorytmy sortowania}}
+
+    Sortowanie to proces porządkowania elementów w określonej kolejności. Istnieje wiele algorytmów sortowania, takich jak quicksort, mergesort, czy bubble sort. Każdy z nich ma swoje wady i zalety w zależności od danych wejściowych i kontekstu, w którym jest stosowany \cite{algorithms}.
+    
+    \item{\textbf{Algorytmy wyszukiwania}}
+
+    Algorytmy wyszukiwania służą do znalezienia określonego elementu w strukturze danych. Przykładami są algorytm wyszukiwania liniowego oraz algorytm wyszukiwania binarnego, który działa znacznie szybciej w posortowanych zbiorach danych \cite{sedgewick}.
+    
+    \item{\textbf{Algorytmy grafowe}}
+
+    Algorytmy działające na grafach są kluczowe w wielu dziedzinach, od analizy sieci po optymalizację tras. Do najważniejszych należą algorytm Dijkstry do znajdowania najkrótszej ścieżki, algorytm Kruskala i algorytm Prima do znajdowania minimalnego drzewa rozpinającego \cite{algorithms}.
+    
+    \item{\textbf{Algorytmy sztucznej inteligencji}}
+
+    Wraz z rozwojem sztucznej inteligencji, algorytmy AI zyskały na znaczeniu. Algorytmy te, takie jak algorytmy genetyczne, sieci neuronowe czy algorytmy uczące się, umożliwiają komputerom naśladowanie procesów myślowych człowieka, podejmowanie decyzji oraz uczenie się na podstawie danych \cite{Mitchell1996AnIT}.
+    
+\end{itemize}
+
+\subsection{Złożoność obliczeniowa algorytmów}
+
+Złożoność obliczeniowa odnosi się do ilości zasobów, takich jak czas i pamięć, które są potrzebne do wykonania algorytmu. Jest to kluczowy aspekt przy ocenie efektywności algorytmu. Złożoność obliczeniową wyraża się zazwyczaj w notacji O (Big O), która opisuje asymptotyczne zachowanie algorytmu, czyli jak rośnie jego czas wykonywania wraz ze wzrostem wielkości danych wejściowych \cite{artoOfProgramming}.
+
+Przykłady:
+\begin{itemize}
+    \item{\textbf{O(1)}}
+
+    Stała złożoność czasowa, niezależna od wielkości danych wejściowych.
+    
+    \item{\textbf{O(n)}}
+
+    Złożoność liniowa, czas wykonywania rośnie proporcjonalnie do wielkości danych wejściowych.
+    
+    \item{\textbf{O(n^{2})}}
+
+    Złożoność kwadratowa, czas wykonywania rośnie kwadratowo wraz ze wzrostem danych wejściowych.
+    
+\end{itemize}
+
+\subsection{Znaczenie algorytmów w informatyce} Współczesna informatyka nie mogłaby istnieć bez algorytmów. Stanowią one fundament każdej aplikacji, od prostych programów po zaawansowane systemy komercyjne. Znajomość algorytmów i umiejętność ich optymalizacji jest kluczowa dla programistów, inżynierów oprogramowania oraz naukowców zajmujących się sztuczną inteligencją, big data czy analizą danych.

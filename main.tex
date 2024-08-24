@@ -55,13 +55,15 @@ breaklines=true
   breaklines=true
 }
 
+\newcommand{\tocless}[2]{\bgroup\let\addcontentsline=\nocontentsline#1{#2}\egroup}
+
 \begin{document}
 
 %--------------------------------------
 % Strona tytułowa
 %--------------------------------------
 \MasterThesis % Dla pracy inżynierskiej mamy \EngineerThesis
-\instytut{Instytut Automatyki i Informatyki Stosowanej}
+\instytut{Automatyki i Informatyki Stosowanej}
 \kierunek{Informatyka}
 \specjalnosc{Systemy Internetowe Wspomagania Zarządzania}
 \title{
@@ -81,11 +83,11 @@ breaklines=true
 %--------------------------------------
 \cleardoublepage % Zaczynamy od nieparzystej strony
 \streszczenie{
-Celem niniejszej pracy było zaimplementowanie gry strategicznej Statki i opracowanie algorytmów decyzyjnych, aby ostatecznie przeanalizować skuteczność poszczególnych algorytmów. Według wstępnych założeń, algorytmy miały opierać się na heurystykach. Analiza skuteczności miała opierać się na bezpośrednich starciach różnych algorytmów oraz jeśli udałoby uzbierać się wystarczająco wiele danych - na starciach człowiek - algorytm.
+Celem niniejszej pracy było zaimplementowanie gry strategicznej Statki i opracowanie algorytmów decyzyjnych, aby ostatecznie przeanalizować skuteczność poszczególnych algorytmów. Według wstępnych założeń, algorytmy miały opierać się na heurystykach. Analiza skuteczności miała opierać się na bezpośrednich starciach różnych algorytmów oraz na starciach człowiek - algorytm.
 \\ \indent W pracy omówione zostały zagadnienia związane z heurystykami, z punktu widzenia logiki oraz informatyki. Opisane zostały typowe zastosowania heurystyk.
 \\ \indent W dalszej części pracy opisane zostało zaimplementowane rozwiązanie - wykorzystany stack technologiczny, logika aplikacji, implementacja poszczególnych heurystyk. Opisane zostało działanie najważniejszych fragmentów kodu.
-\\ \indent Kolejnym krokiem było testowanie algorytmów. W tym celu napisane zostały testy jednostkowe, które zestawiały przeciwko sobie poszczególne heurystyki. Na podstawie wyników tych starć dokonano analizy porównawczej. Podjęto również próbę analizy starć między algorytmami oraz ludźmi.
-\\ \indent W ostatniej częsci pracy podsumowane zostały wyniki, oraz wypisane zostały wnioski - co można było zrobić lepiej, jakie są możliwości rozwoju aplikacji.
+\\ \indent Kolejnym krokiem było testowanie algorytmów. W tym celu napisane zostały testy jednostkowe, które zestawiały przeciwko sobie poszczególne heurystyki. Na podstawie wyników tych starć dokonano analizy porównawczej. Podjęto również próbę analizy starć pomiędzy algorytmami oraz ludźmi.
+\\ \indent W ostatniej części pracy podsumowane zostały wyniki oraz opisane zostały wnioski - co można było zrobić lepiej, jakie są możliwości rozwoju aplikacji.
 }
 \slowakluczowe heurystyki, statki, algorytmy, vue.js, .net
 
@@ -94,11 +96,11 @@ Celem niniejszej pracy było zaimplementowanie gry strategicznej Statki i opraco
 %--------------------------------------
 \newpage
 \abstract {
-The purpose of this study was to implement the strategy game Battleships and to develop decision-making algorithms to analyze the effectiveness of the various algorithms. According to the initial assumptions, the algorithms were to be based on heuristics. The effectiveness analysis was to be based on direct clashes between different algorithms and, if enough data could be collected, on human-algorithm clashes.
+The purpose of this study was to implement the strategy game Battleships and to develop decision-making algorithms to analyze the effectiveness of the various algorithms. According to the initial assumptions, the algorithms were to be based on heuristics. The effectiveness analysis was to be based on direct clashes between different algorithms and on human-algorithm clashes.
 \\ \indent The paper discusses issues related to heuristics, from the point of view of logic and computer science. Typical applications of heuristics are described.
 \\ \indent The following part of the work describes the implemented solution - the technology stack used, the application logic, the implementation of individual heuristics. The most important code fragments were highlighted and described.
 \\ \indent The next step was to test the algorithms. For this purpose, unit tests were written that pitted individual heuristics against each other. Based on the results of these clashes, a comparative analysis was made.  An attempt was also made to analyze clashes between the algorithms and players.
-\\ \indent In the last part of the work the results were summarized, and conclusions were written out - what could have been done better, what are the possibilities for the development of the application.
+\\ \indent In the last part of the work the results were summarized, and conclusions were written - what could have been done better, what are the possibilities for the development of the application.
 }
 \keywords heuristics, battleships, algorithms, vue.js, .net
 
@@ -123,6 +125,7 @@ The purpose of this study was to implement the strategy game Battleships and to 
 
 \input{tex/1-wstep}         % Wygodnie jest trzymać każdy rozdział w osobnym pliku.
 \input{tex/2-statki}    % Umożliwia to również łatwą migrację do nowej wersji szablonu:
+\input{tex/3-algorytmy}
 \input{tex/3-heurystyki}
 \input{tex/4-implementacja}
 \input{tex/5-przeglad}
@@ -163,6 +166,9 @@ The purpose of this study was to implement the strategy game Battleships and to 
 \listoftablestoc      % Spis tabel.
 \vspace{1cm}          % vertical space
 \listofappendicestoc  % Spis załączników
+
+% \renewcommand{\thesubsection}{\Alph{subsection}}
+
 
 % Załączniki
 \newpage
